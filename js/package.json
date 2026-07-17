@@ -1,0 +1,73 @@
+{
+  "name": "@runapi.ai/midjourney",
+  "runapi": {
+    "slug": "midjourney"
+  },
+  "version": "0.1.0",
+  "description": "RunAPI Midjourney SDK for image generation, editing, image-to-video, and image helper workflows in JavaScript, Python, Ruby, Go, Java, and PHP",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "skills",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@runapi.ai/core": "^0.2.12"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@vitest/coverage-v8": "^1.6.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "runapi",
+    "runapi-ai",
+    "midjourney",
+    "api",
+    "sdk",
+    "typescript",
+    "python",
+    "ruby",
+    "golang",
+    "java",
+    "maven",
+    "gradle",
+    "image-generation",
+    "video-generation",
+    "midjourney-api"
+  ],
+  "author": "RunAPI",
+  "license": "Apache-2.0",
+  "homepage": "https://runapi.ai/models/midjourney",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/runapi-ai/midjourney-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/runapi-ai/midjourney-sdk/issues"
+  }
+}

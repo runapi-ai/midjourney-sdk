@@ -1,0 +1,132 @@
+import pytest
+
+from runapi.core import config
+from runapi.core.errors import AuthenticationError, ValidationError
+from runapi.midjourney import MidjourneyClient
+from runapi.midjourney.resources import EditImage, GetSeed, ImageToPrompt, ImageToVideo, TextToImage
+from runapi.midjourney.types import GetSeedResponse, ImageToPromptResponse
+
+
+class FakeHttp:
+    def __init__(self, *responses):
+        self._responses = list(responses)
+        self.calls = []
+
+    def request(self, method, path, body=None, options=None):
+        self.calls.append((method, path, body))
+        if self._responses:
+            return self._responses.pop(0)
+        return {"id": "task_1", "status": "processing"}
+
+
+@pytest.fixture(autouse=True)
+def reset_config(monkeypatch):
+    monkeypatch.delenv("RUNAPI_API_KEY", raising=False)
+    monkeypatch.setattr(config, "api_key", None)
+    yield
+
+
+def test_requires_api_key():
+    with pytest.raises(AuthenticationError, match="API key is required"):
+        MidjourneyClient()
+
+
+def test_exposes_resources_with_injected_http():
+    fake = FakeHttp()
+    client = MidjourneyClient(api_key="k", http_client=fake)
+
+    assert isinstance(client.text_to_image, TextToImage)
+    assert isinstance(client.edit_image, EditImage)
+    assert isinstance(client.image_to_video, ImageToVideo)
+    assert isinstance(client.image_to_prompt, ImageToPrompt)
+    assert isinstance(client.get_seed, GetSeed)
+    assert client.text_to_image._http is fake
+
+
+def test_async_resources_use_public_paths_and_flat_bodies():
+    fake = FakeHttp()
+    client = MidjourneyClient(api_key="k", http_client=fake)
+
+    client.text_to_image.create(
+        model="midjourney-v8.1",
+        prompt="A cobalt vase",
+        include_split_images=False,
+    )
+    client.text_to_image.get("task_1")
+    client.edit_image.create(
+        model="midjourney-edit-image",
+        prompt="Change the vase color",
+        source_image_url="https://cdn.runapi.ai/public/samples/source.png",
+        mask_url="https://cdn.runapi.ai/public/samples/mask.png",
+    )
+    client.image_to_video.create(
+        model="midjourney-image-to-video",
+        source_image_url="https://cdn.runapi.ai/public/samples/source.png",
+        output_resolution="480p",
+        enable_loop=False,
+    )
+
+    assert fake.calls == [
+        (
+            "post",
+            "/api/v1/midjourney/text_to_image",
+            {"model": "midjourney-v8.1", "prompt": "A cobalt vase", "include_split_images": False},
+        ),
+        ("get", "/api/v1/midjourney/text_to_image/task_1", None),
+        (
+            "post",
+            "/api/v1/midjourney/edit_image",
+            {
+                "model": "midjourney-edit-image",
+                "prompt": "Change the vase color",
+                "source_image_url": "https://cdn.runapi.ai/public/samples/source.png",
+                "mask_url": "https://cdn.runapi.ai/public/samples/mask.png",
+            },
+        ),
+        (
+            "post",
+            "/api/v1/midjourney/image_to_video",
+            {
+                "model": "midjourney-image-to-video",
+                "source_image_url": "https://cdn.runapi.ai/public/samples/source.png",
+                "output_resolution": "480p",
+                "enable_loop": False,
+            },
+        ),
+    ]
+
+
+def test_synchronous_helpers_decode_responses():
+    fake = FakeHttp(
+        {"prompts": ["one", "two", "three", "four"]},
+        {"seed": 8675309},
+    )
+    client = MidjourneyClient(api_key="k", http_client=fake)
+
+    prompts = client.image_to_prompt.run(source_image_url="https://cdn.runapi.ai/public/samples/source.png")
+    seed = client.get_seed.run(image_id="image-1")
+
+    assert isinstance(prompts, ImageToPromptResponse)
+    assert prompts.prompts == ["one", "two", "three", "four"]
+    assert isinstance(seed, GetSeedResponse)
+    assert seed.seed == 8675309
+
+
+def test_get_seed_preserves_error_response_without_seed():
+    fake = FakeHttp({"error": "Seed lookup failed"})
+    client = MidjourneyClient(api_key="k", http_client=fake)
+
+    result = client.get_seed.run(image_id="image-1")
+
+    assert isinstance(result, GetSeedResponse)
+    assert result.seed is None
+    assert result.error == "Seed lookup failed"
+
+
+def test_edit_image_requires_prompt_from_generated_contract():
+    client = MidjourneyClient(api_key="k", http_client=FakeHttp())
+    with pytest.raises(ValidationError, match="prompt is required"):
+        client.edit_image.create(
+            model="midjourney-edit-image",
+            source_image_url="https://cdn.runapi.ai/public/samples/source.png",
+        )
