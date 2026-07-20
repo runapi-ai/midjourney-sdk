@@ -1,0 +1,42 @@
+package ai.runapi.midjourney.types;
+
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+/** Response for prompt shortening operations. */
+public class ShortenPromptResponse {
+  @JsonProperty("error")
+  private String error;
+
+  @JsonProperty("prompts")
+  private List<String> prompts;
+
+  private final Map<String, JsonNode> extraFields = new LinkedHashMap<String, JsonNode>();
+
+  /** Returns the error message, if the request failed. */
+  public String getError() {
+    return error;
+  }
+
+  /** Returns the prompt suggestions, when present. */
+  public List<String> getPrompts() {
+    return prompts == null ? null : Collections.unmodifiableList(prompts);
+  }
+
+  /** Returns unrecognized response fields preserved from the API response. */
+  @JsonAnyGetter
+  public Map<String, JsonNode> extraFields() {
+    return Collections.unmodifiableMap(extraFields);
+  }
+
+  @JsonAnySetter
+  void putExtraField(String name, JsonNode value) {
+    extraFields.put(name, value);
+  }
+}

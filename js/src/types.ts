@@ -51,6 +51,11 @@ export interface MidjourneyImageToPromptParams {
   source_image_url: string;
 }
 
+export interface MidjourneyShortenPromptParams {
+  /** Prompt to shorten into concise suggestions. */
+  prompt: string;
+}
+
 export interface MidjourneyGetSeedParams {
   /** Image ID from a completed Midjourney image task in the current account. */
   image_id: string;
@@ -97,6 +102,11 @@ export type CompletedMidjourneyVideoTaskResponse = MidjourneyVideoTaskResponse &
 };
 
 export interface MidjourneyImageToPromptResponse {
+  prompts: string[];
+  error?: string;
+}
+
+export interface MidjourneyShortenPromptResponse {
   prompts: string[];
   error?: string;
 }

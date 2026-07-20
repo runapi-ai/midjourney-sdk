@@ -39,6 +39,11 @@ class ImageToPromptResponse(BaseModel):
     error = optional(str)
 
 
+class ShortenPromptResponse(BaseModel):
+    prompts = required([str])
+    error = optional(str)
+
+
 class GetSeedResponse(BaseModel):
     seed = optional(int)
     error = optional(str)

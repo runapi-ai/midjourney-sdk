@@ -26,6 +26,8 @@ import ai.runapi.midjourney.types.ImageToPromptResponse;
 import ai.runapi.midjourney.types.ImageToVideoModel;
 import ai.runapi.midjourney.types.ImageToVideoParams;
 import ai.runapi.midjourney.types.ImageToVideoResponse;
+import ai.runapi.midjourney.types.ShortenPromptParams;
+import ai.runapi.midjourney.types.ShortenPromptResponse;
 import ai.runapi.midjourney.types.TextToImageModel;
 import ai.runapi.midjourney.types.TextToImageParams;
 import ai.runapi.midjourney.types.TextToImageResponse;
@@ -41,6 +43,7 @@ class MidjourneyClientTest {
     MidjourneyClient client = MidjourneyClient.builder().apiKey("sk-test").build();
 
     assertNotNull(client.textToImage());
+    assertNotNull(client.shortenPrompt());
     assertNotNull(client.files());
     assertNotNull(client.account());
   }
@@ -223,6 +226,22 @@ class MidjourneyClientTest {
                   .sourceImageUrl("https://cdn.runapi.ai/public/samples/image.jpg")
                   .build(),
           RequestOptions.none()));
+    }
+
+    @Test
+    void shortensPromptSynchronously() throws Exception {
+      CapturingTransport transport = new CapturingTransport("{\"prompts\":[\"Concise mountain landscape\"]}");
+      MidjourneyClient client = MidjourneyClient.builder().apiKey("sk-test").transport(transport).build();
+
+      ShortenPromptResponse response = client.shortenPrompt().run(
+          ShortenPromptParams.builder()
+              .prompt("A detailed cinematic mountain landscape")
+              .build());
+
+      assertEquals("POST", transport.request.getMethod().name());
+      assertEquals("/api/v1/midjourney/shorten_prompt", transport.request.getPath());
+      assertEquals("A detailed cinematic mountain landscape", bodyJson(transport.request).get("prompt").asText());
+      assertEquals("Concise mountain landscape", response.getPrompts().get(0));
     }
 
     @Test

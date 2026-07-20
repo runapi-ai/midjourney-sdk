@@ -8,6 +8,7 @@ from .resources.edit_image import EditImage
 from .resources.get_seed import GetSeed
 from .resources.image_to_prompt import ImageToPrompt
 from .resources.image_to_video import ImageToVideo
+from .resources.shorten_prompt import ShortenPrompt
 from .resources.text_to_image import TextToImage
 
 
@@ -22,4 +23,5 @@ class MidjourneyClient:
         self.edit_image = EditImage(http)
         self.image_to_video = ImageToVideo(http)
         self.image_to_prompt = ImageToPrompt(http)
+        self.shorten_prompt = ShortenPrompt(http)
         self.get_seed = GetSeed(http)

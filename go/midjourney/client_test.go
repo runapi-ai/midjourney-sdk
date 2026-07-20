@@ -138,4 +138,19 @@ func TestSynchronousHelpersPostAndDecode(t *testing.T) {
 	if body["image_id"] != "image_123" {
 		t.Fatalf("unexpected seed body: %#v", body)
 	}
+
+	stub.response = json.RawMessage(`{"prompts":["Concise mountain landscape"]}`)
+	shortenResult, err := client.ShortenPrompt.Run(context.Background(), ShortenPromptParams{
+		Prompt: "A detailed cinematic mountain landscape",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stub.method != "POST" || stub.path != "/api/v1/midjourney/shorten_prompt" || len(shortenResult.Prompts) != 1 {
+		t.Fatalf("unexpected prompt shortening result: %#v", shortenResult)
+	}
+	body = stub.body.(map[string]any)
+	if body["prompt"] != "A detailed cinematic mountain landscape" {
+		t.Fatalf("unexpected prompt shortening body: %#v", body)
+	}
 }

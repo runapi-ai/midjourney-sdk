@@ -48,6 +48,15 @@ RSpec.describe "Midjourney resources" do
     expect(http).to receive(:request).with(:post, "/api/v1/midjourney/get_seed", body: {image_id: "image-1"})
       .and_return("seed" => 8675309)
     expect(get_seed.run(image_id: "image-1").seed).to eq(8675309)
+
+    shorten_prompt = RunApi::Midjourney::Resources::ShortenPrompt.new(http)
+    expect(http).to receive(:request).with(
+      :post,
+      "/api/v1/midjourney/shorten_prompt",
+      body: {prompt: "A detailed cinematic mountain landscape"}
+    ).and_return("prompts" => ["Concise mountain landscape"])
+    expect(shorten_prompt.run(prompt: "A detailed cinematic mountain landscape").prompts)
+      .to eq(["Concise mountain landscape"])
   end
 
   it "preserves get seed error responses without requiring a seed" do

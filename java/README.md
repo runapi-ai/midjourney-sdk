@@ -8,7 +8,7 @@ Gradle:
 
 ```kotlin
 dependencies {
-  implementation("ai.runapi:runapi-midjourney:0.1.0")
+  implementation("ai.runapi:runapi-midjourney:0.2.0")
 }
 ```
 
@@ -27,7 +27,7 @@ CompletedTextToImageResponse result = client.textToImage().run(
 );
 ```
 
-Use `create`, `get`, and `run` for image and video tasks. `imageToPrompt().run(...)` and `getSeed().run(...)` return synchronously. Generated media URLs are temporary and should be stored in durable storage.
+Use `create`, `get`, and `run` for image and video tasks. `imageToPrompt().run(...)`, `shortenPrompt().run(...)`, and `getSeed().run(...)` return synchronously. Generated media URLs are temporary and should be stored in durable storage.
 
 ## Links
 

@@ -4,6 +4,7 @@ import { EditImage } from '../../src/resources/edit-image';
 import { GetSeed } from '../../src/resources/get-seed';
 import { ImageToPrompt } from '../../src/resources/image-to-prompt';
 import { ImageToVideo } from '../../src/resources/image-to-video';
+import { ShortenPrompt } from '../../src/resources/shorten-prompt';
 import { TextToImage } from '../../src/resources/text-to-image';
 
 describe('Midjourney resources', () => {
@@ -86,6 +87,19 @@ describe('Midjourney resources', () => {
     expect(seed.seed).toBe(8675309);
     expect(mockHttp.request).toHaveBeenLastCalledWith('POST', '/api/v1/midjourney/get_seed', {
       body: { image_id: 'image-1' },
+    });
+  });
+
+  it('shortens a prompt and returns decoded suggestions', async () => {
+    vi.mocked(mockHttp.request).mockResolvedValueOnce({ prompts: ['Concise mountain landscape'] });
+
+    const result = await new ShortenPrompt(mockHttp).run({
+      prompt: 'A detailed cinematic mountain landscape',
+    });
+
+    expect(result.prompts).toEqual(['Concise mountain landscape']);
+    expect(mockHttp.request).toHaveBeenCalledWith('POST', '/api/v1/midjourney/shorten_prompt', {
+      body: { prompt: 'A detailed cinematic mountain landscape' },
     });
   });
 });

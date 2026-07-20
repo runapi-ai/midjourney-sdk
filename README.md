@@ -22,7 +22,7 @@
 </div>
 <br/>
 
-The Midjourney SDK provides typed clients for text-to-image generation, prompt-guided image editing, image-to-video generation, image-to-prompt analysis, and seed lookup. The public `midjourney-sdk` repository groups the non-PHP language packages, examples, CI, and language release tags. The PHP package is released from a split Composer repository.
+The Midjourney SDK provides typed clients for text-to-image generation, prompt-guided image editing, image-to-video generation, image-to-prompt analysis, prompt shortening, and seed lookup. The public `midjourney-sdk` repository groups the non-PHP language packages, examples, CI, and language release tags. The PHP package is released from a split Composer repository.
 
 ## Install
 
@@ -55,6 +55,7 @@ console.log(result.images[0].url);
 - `editImage`: create, get, or create-and-poll a prompt-guided image edit.
 - `imageToVideo`: create, get, or create-and-poll a video task from a source image.
 - `imageToPrompt`: synchronously derive prompt suggestions from a source image.
+- `shortenPrompt`: synchronously turn a prompt into 1 to 5 concise suggestions.
 - `getSeed`: synchronously retrieve the seed for an account-owned completed Midjourney image.
 
 Generated media URLs are temporary. Download and store results in your own durable storage.

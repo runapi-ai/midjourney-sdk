@@ -3,8 +3,8 @@ import pytest
 from runapi.core import config
 from runapi.core.errors import AuthenticationError, ValidationError
 from runapi.midjourney import MidjourneyClient
-from runapi.midjourney.resources import EditImage, GetSeed, ImageToPrompt, ImageToVideo, TextToImage
-from runapi.midjourney.types import GetSeedResponse, ImageToPromptResponse
+from runapi.midjourney.resources import EditImage, GetSeed, ImageToPrompt, ImageToVideo, ShortenPrompt, TextToImage
+from runapi.midjourney.types import GetSeedResponse, ImageToPromptResponse, ShortenPromptResponse
 
 
 class FakeHttp:
@@ -39,6 +39,7 @@ def test_exposes_resources_with_injected_http():
     assert isinstance(client.edit_image, EditImage)
     assert isinstance(client.image_to_video, ImageToVideo)
     assert isinstance(client.image_to_prompt, ImageToPrompt)
+    assert isinstance(client.shorten_prompt, ShortenPrompt)
     assert isinstance(client.get_seed, GetSeed)
     assert client.text_to_image._http is fake
 
@@ -99,15 +100,24 @@ def test_async_resources_use_public_paths_and_flat_bodies():
 def test_synchronous_helpers_decode_responses():
     fake = FakeHttp(
         {"prompts": ["one", "two", "three", "four"]},
+        {"prompts": ["Concise mountain landscape"]},
         {"seed": 8675309},
     )
     client = MidjourneyClient(api_key="k", http_client=fake)
 
     prompts = client.image_to_prompt.run(source_image_url="https://cdn.runapi.ai/public/samples/source.png")
+    shortened = client.shorten_prompt.run(prompt="A detailed cinematic mountain landscape")
     seed = client.get_seed.run(image_id="image-1")
 
     assert isinstance(prompts, ImageToPromptResponse)
     assert prompts.prompts == ["one", "two", "three", "four"]
+    assert isinstance(shortened, ShortenPromptResponse)
+    assert shortened.prompts == ["Concise mountain landscape"]
+    assert fake.calls[1] == (
+        "post",
+        "/api/v1/midjourney/shorten_prompt",
+        {"prompt": "A detailed cinematic mountain landscape"},
+    )
     assert isinstance(seed, GetSeedResponse)
     assert seed.seed == 8675309
 

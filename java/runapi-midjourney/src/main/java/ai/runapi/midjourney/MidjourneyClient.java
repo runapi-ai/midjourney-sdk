@@ -8,6 +8,7 @@ import ai.runapi.midjourney.resources.EditImageResource;
 import ai.runapi.midjourney.resources.GetSeedResource;
 import ai.runapi.midjourney.resources.ImageToPromptResource;
 import ai.runapi.midjourney.resources.ImageToVideoResource;
+import ai.runapi.midjourney.resources.ShortenPromptResource;
 import ai.runapi.midjourney.resources.TextToImageResource;
 
 /** Midjourney model-family Java SDK client. */
@@ -16,6 +17,7 @@ public final class MidjourneyClient extends BaseClient {
   private final GetSeedResource getSeed;
   private final ImageToPromptResource imageToPrompt;
   private final ImageToVideoResource imageToVideo;
+  private final ShortenPromptResource shortenPrompt;
   private final TextToImageResource textToImage;
 
   private MidjourneyClient(ClientOptions options) {
@@ -24,6 +26,7 @@ public final class MidjourneyClient extends BaseClient {
     this.getSeed = new GetSeedResource(transport(), options());
     this.imageToPrompt = new ImageToPromptResource(transport(), options());
     this.imageToVideo = new ImageToVideoResource(transport(), options());
+    this.shortenPrompt = new ShortenPromptResource(transport(), options());
     this.textToImage = new TextToImageResource(transport(), options());
   }
 
@@ -50,6 +53,11 @@ public final class MidjourneyClient extends BaseClient {
   /** Image To Video operations. */
   public ImageToVideoResource imageToVideo() {
     return imageToVideo;
+  }
+
+  /** Prompt shortening operations. */
+  public ShortenPromptResource shortenPrompt() {
+    return shortenPrompt;
   }
 
   /** Text To Image operations. */

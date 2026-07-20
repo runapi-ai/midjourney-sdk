@@ -45,6 +45,16 @@ CONTRACT = {
             }
         }
     },
+    "shorten-prompt": {
+        "models": [],
+        "fields_by_model": {
+            "_": {
+                "prompt": {
+                    "required": True
+                }
+            }
+        }
+    },
     "text-to-image": {
         "models": ["midjourney-v8.1"],
         "fields_by_model": {

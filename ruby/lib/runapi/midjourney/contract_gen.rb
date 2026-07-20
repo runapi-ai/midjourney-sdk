@@ -49,6 +49,16 @@ module RunApi
           }
         }
       },
+      "shorten-prompt" => {
+        "models" => [],
+        "fields_by_model" => {
+          "_" => {
+            "prompt" => {
+              "required" => true
+            }
+          }
+        }
+      },
       "text-to-image" => {
         "models" => ["midjourney-v8.1"],
         "fields_by_model" => {

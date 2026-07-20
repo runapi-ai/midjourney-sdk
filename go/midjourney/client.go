@@ -20,6 +20,7 @@ const (
 	editImagePath     = "/api/v1/midjourney/edit_image"
 	imageToVideoPath  = "/api/v1/midjourney/image_to_video"
 	imageToPromptPath = "/api/v1/midjourney/image_to_prompt"
+	shortenPromptPath = "/api/v1/midjourney/shorten_prompt"
 	getSeedPath       = "/api/v1/midjourney/get_seed"
 )
 
@@ -30,6 +31,7 @@ type Client struct {
 	EditImage     *EditImage
 	ImageToVideo  *ImageToVideo
 	ImageToPrompt *ImageToPrompt
+	ShortenPrompt *ShortenPrompt
 	GetSeed       *GetSeed
 }
 
@@ -54,6 +56,7 @@ func NewClientWithHTTP(httpClient core.HTTPClient) *Client {
 		EditImage:     &EditImage{http: httpClient},
 		ImageToVideo:  &ImageToVideo{http: httpClient},
 		ImageToPrompt: &ImageToPrompt{http: httpClient},
+		ShortenPrompt: &ShortenPrompt{http: httpClient},
 		GetSeed:       &GetSeed{http: httpClient},
 	}
 }
@@ -133,6 +136,14 @@ type ImageToPrompt struct{ http core.HTTPClient }
 // Run sends a synchronous image-to-prompt request.
 func (r *ImageToPrompt) Run(ctx context.Context, params ImageToPromptParams, opts ...option.RequestOption) (*ImageToPromptResponse, error) {
 	return runSync[ImageToPromptResponse](ctx, r.http, "image-to-prompt", imageToPromptPath, params, opts...)
+}
+
+// ShortenPrompt derives concise suggestions from a prompt.
+type ShortenPrompt struct{ http core.HTTPClient }
+
+// Run sends a synchronous prompt shortening request.
+func (r *ShortenPrompt) Run(ctx context.Context, params ShortenPromptParams, opts ...option.RequestOption) (*ShortenPromptResponse, error) {
+	return runSync[ShortenPromptResponse](ctx, r.http, "shorten-prompt", shortenPromptPath, params, opts...)
 }
 
 // GetSeed looks up the seed for an account-owned generated image.

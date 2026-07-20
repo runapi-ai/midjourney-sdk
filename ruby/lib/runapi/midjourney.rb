@@ -7,6 +7,7 @@ require_relative "midjourney/resources/text_to_image"
 require_relative "midjourney/resources/edit_image"
 require_relative "midjourney/resources/image_to_video"
 require_relative "midjourney/resources/image_to_prompt"
+require_relative "midjourney/resources/shorten_prompt"
 require_relative "midjourney/resources/get_seed"
 require_relative "midjourney/client"
 

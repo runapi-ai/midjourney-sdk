@@ -63,6 +63,11 @@ type ImageToPromptParams struct {
 	SourceImageURL string `json:"source_image_url" help:"required; source image URL"`
 }
 
+// ShortenPromptParams configures a synchronous prompt shortening request.
+type ShortenPromptParams struct {
+	Prompt string `json:"prompt" help:"required; prompt to shorten"`
+}
+
 // GetSeedParams configures a synchronous seed lookup for an account-owned image.
 type GetSeedParams struct {
 	ImageID string `json:"image_id" help:"required; image ID from a completed Midjourney image task"`
@@ -102,6 +107,12 @@ type VideoTaskResponse struct {
 
 // ImageToPromptResponse contains prompt suggestions derived from an image.
 type ImageToPromptResponse struct {
+	Prompts []string `json:"prompts,omitempty"`
+	Error   string   `json:"error,omitempty"`
+}
+
+// ShortenPromptResponse contains concise prompt suggestions.
+type ShortenPromptResponse struct {
 	Prompts []string `json:"prompts,omitempty"`
 	Error   string   `json:"error,omitempty"`
 }
