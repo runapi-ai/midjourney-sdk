@@ -1,6 +1,6 @@
 # Midjourney Go SDK for RunAPI
 
-Use the Midjourney Go module for typed image generation, editing, image-to-video, image-to-prompt, prompt shortening, and seed lookup in Go services and command-line tools.
+Use the Midjourney Go module for typed image generation, editing, image-to-video, first-video extension, image-to-prompt, prompt shortening, and seed lookup in Go services and command-line tools.
 
 ## Install
 
@@ -19,7 +19,7 @@ result, err := client.TextToImage.Run(context.Background(), midjourney.TextToIma
 fmt.Println(result.Images[0].URL)
 ```
 
-Use `Create`, `Get`, and `Run` for `TextToImage`, `EditImage`, and `ImageToVideo`. Use `Run` directly for `ImageToPrompt`, `ShortenPrompt`, and `GetSeed`. Generated media URLs are temporary and should be stored in durable storage.
+Use `Create`, `Get`, and `Run` for `TextToImage`, `EditImage`, `ImageToVideo`, and `ExtendVideo`. `ExtendVideo` accepts the task ID of an account-owned completed direct image-to-video task and continues its first video; extension tasks cannot be chained. Use `Run` directly for `ImageToPrompt`, `ShortenPrompt`, and `GetSeed`. Generated media URLs are temporary and should be stored in durable storage.
 
 ## Links
 

@@ -14,11 +14,13 @@ import ai.runapi.core.json.Json;
 import ai.runapi.midjourney.types.CompletedTextToImageResponse;
 import ai.runapi.midjourney.types.TextToImageResponse;
 import ai.runapi.midjourney.types.CompletedEditImageResponse;
+import ai.runapi.midjourney.types.CompletedExtendVideoResponse;
 import ai.runapi.midjourney.types.CompletedImageToVideoResponse;
 import ai.runapi.midjourney.types.CompletedTextToImageResponse;
 import ai.runapi.midjourney.types.EditImageModel;
 import ai.runapi.midjourney.types.EditImageParams;
 import ai.runapi.midjourney.types.EditImageResponse;
+import ai.runapi.midjourney.types.ExtendVideoParams;
 import ai.runapi.midjourney.types.GetSeedParams;
 import ai.runapi.midjourney.types.GetSeedResponse;
 import ai.runapi.midjourney.types.ImageToPromptParams;
@@ -43,6 +45,7 @@ class MidjourneyClientTest {
     MidjourneyClient client = MidjourneyClient.builder().apiKey("sk-test").build();
 
     assertNotNull(client.textToImage());
+    assertNotNull(client.extendVideo());
     assertNotNull(client.shortenPrompt());
     assertNotNull(client.files());
     assertNotNull(client.account());
@@ -76,6 +79,43 @@ class MidjourneyClientTest {
     assertNotNull(body);
     assertEquals(true, body.get("enable_prompt_translation").asBoolean());
     assertEquals(true, body.get("include_split_images").asBoolean());
+  }
+
+  @Test
+  void extendVideoUsesOnlyPublicContinuationFields() throws Exception {
+    CapturingTransport createTransport = new CapturingTransport("{\"id\":\"task_extend\",\"status\":\"processing\"}");
+    MidjourneyClient client = MidjourneyClient.builder().apiKey("sk-test").transport(createTransport).build();
+
+    client.extendVideo().create(
+        ExtendVideoParams.builder()
+            .sourceTaskId("task_source")
+            .prompt("Continue the camera orbit")
+            .callbackUrl("https://example.test/callback")
+            .build());
+
+    assertEquals("POST", createTransport.request.getMethod().name());
+    assertEquals("/api/v1/midjourney/extend_video", createTransport.request.getPath());
+    JsonNode body = bodyJson(createTransport.request);
+    assertEquals("task_source", body.get("source_task_id").asText());
+    assertEquals("Continue the camera orbit", body.get("prompt").asText());
+    assertEquals("https://example.test/callback", body.get("callback_url").asText());
+    assertEquals(false, body.has("model"));
+    assertEquals(false, body.has("video_id"));
+    assertEquals(false, body.has("video_index"));
+
+    CapturingTransport getTransport = new CapturingTransport("{\"id\":\"task_extend\",\"status\":\"completed\",\"videos\":[{\"url\":\"https://file.runapi.ai/extended\"}]}");
+    MidjourneyClient getClient = MidjourneyClient.builder().apiKey("sk-test").transport(getTransport).build();
+    assertNotNull(getClient.extendVideo().get("task_extend"));
+    assertEquals("/api/v1/midjourney/extend_video/task_extend", getTransport.request.getPath());
+
+    SequenceTransport runTransport = new SequenceTransport(
+        "{\"id\":\"task_extend\",\"status\":\"processing\"}",
+        "{\"id\":\"task_extend\",\"status\":\"completed\",\"videos\":[{\"url\":\"https://file.runapi.ai/extended\"}]}");
+    MidjourneyClient runClient = MidjourneyClient.builder().apiKey("sk-test").transport(runTransport).build();
+    CompletedExtendVideoResponse response = runClient.extendVideo().run(
+        ExtendVideoParams.builder().sourceTaskId("task_source").build(),
+        RequestOptions.builder().pollingInterval(Duration.ofMillis(1)).pollingMaxWait(Duration.ofSeconds(1)).build());
+    assertNotNull(response.getVideos());
   }
 
   @Test

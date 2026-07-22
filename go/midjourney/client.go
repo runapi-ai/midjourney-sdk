@@ -19,6 +19,7 @@ const (
 	textToImagePath   = "/api/v1/midjourney/text_to_image"
 	editImagePath     = "/api/v1/midjourney/edit_image"
 	imageToVideoPath  = "/api/v1/midjourney/image_to_video"
+	extendVideoPath   = "/api/v1/midjourney/extend_video"
 	imageToPromptPath = "/api/v1/midjourney/image_to_prompt"
 	shortenPromptPath = "/api/v1/midjourney/shorten_prompt"
 	getSeedPath       = "/api/v1/midjourney/get_seed"
@@ -30,6 +31,7 @@ type Client struct {
 	TextToImage   *TextToImage
 	EditImage     *EditImage
 	ImageToVideo  *ImageToVideo
+	ExtendVideo   *ExtendVideo
 	ImageToPrompt *ImageToPrompt
 	ShortenPrompt *ShortenPrompt
 	GetSeed       *GetSeed
@@ -55,6 +57,7 @@ func NewClientWithHTTP(httpClient core.HTTPClient) *Client {
 		TextToImage:   &TextToImage{http: httpClient},
 		EditImage:     &EditImage{http: httpClient},
 		ImageToVideo:  &ImageToVideo{http: httpClient},
+		ExtendVideo:   &ExtendVideo{http: httpClient},
 		ImageToPrompt: &ImageToPrompt{http: httpClient},
 		ShortenPrompt: &ShortenPrompt{http: httpClient},
 		GetSeed:       &GetSeed{http: httpClient},
@@ -122,6 +125,39 @@ func (r *ImageToVideo) Get(ctx context.Context, id string, opts ...option.Reques
 
 // Run submits an image-to-video task and polls until completion.
 func (r *ImageToVideo) Run(ctx context.Context, params ImageToVideoParams, opts ...option.RequestOption) (*VideoTaskResponse, error) {
+	_, pollingOptions := option.ResolveRequestOptions(opts...)
+	return core.RunAsync(ctx, func(ctx context.Context) (*core.TaskCreateResponse, error) {
+		return r.Create(ctx, params, opts...)
+	}, func(ctx context.Context, id string) (*VideoTaskResponse, error) {
+		return r.Get(ctx, id, opts...)
+	}, pollingOptions)
+}
+
+// ExtendVideo continues the first video from a completed image-to-video task.
+type ExtendVideo struct{ http core.HTTPClient }
+
+// Create submits a first-video extension task and returns immediately with a task ID.
+func (r *ExtendVideo) Create(ctx context.Context, params ExtendVideoParams, opts ...option.RequestOption) (*core.TaskCreateResponse, error) {
+	requestOptions, _ := option.ResolveRequestOptions(opts...)
+	body := core.CompactParams(params)
+	validationBody := make(map[string]any, len(body)+1)
+	for key, value := range body {
+		validationBody[key] = value
+	}
+	validationBody["model"] = string(ModelImageToVideo)
+	if err := core.ValidateParams(contractSchema["extend-video"], validationBody); err != nil {
+		return nil, err
+	}
+	return core.PostJSON[core.TaskCreateResponse](ctx, r.http, extendVideoPath, body, requestOptions)
+}
+
+// Get retrieves the current status and result of a first-video extension task.
+func (r *ExtendVideo) Get(ctx context.Context, id string, opts ...option.RequestOption) (*VideoTaskResponse, error) {
+	return getAsync[VideoTaskResponse](ctx, r.http, extendVideoPath, id, opts...)
+}
+
+// Run submits a first-video extension task and polls until completion.
+func (r *ExtendVideo) Run(ctx context.Context, params ExtendVideoParams, opts ...option.RequestOption) (*VideoTaskResponse, error) {
 	_, pollingOptions := option.ResolveRequestOptions(opts...)
 	return core.RunAsync(ctx, func(ctx context.Context) (*core.TaskCreateResponse, error) {
 		return r.Create(ctx, params, opts...)

@@ -58,6 +58,13 @@ type ImageToVideoParams struct {
 	CallbackURL       string            `json:"callback_url,omitempty" help:"optional; webhook URL"`
 }
 
+// ExtendVideoParams configures a first-video extension request.
+type ExtendVideoParams struct {
+	SourceTaskID string `json:"source_task_id" help:"required; completed image-to-video task ID"`
+	Prompt       string `json:"prompt,omitempty" help:"optional; continuation description"`
+	CallbackURL  string `json:"callback_url,omitempty" help:"optional; webhook URL"`
+}
+
 // ImageToPromptParams configures a synchronous image description request.
 type ImageToPromptParams struct {
 	SourceImageURL string `json:"source_image_url" help:"required; source image URL"`

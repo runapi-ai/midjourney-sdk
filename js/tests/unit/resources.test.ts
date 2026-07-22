@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { HttpClient } from '@runapi.ai/core';
 import { EditImage } from '../../src/resources/edit-image';
+import { ExtendVideo } from '../../src/resources/extend-video';
 import { GetSeed } from '../../src/resources/get-seed';
 import { ImageToPrompt } from '../../src/resources/image-to-prompt';
 import { ImageToVideo } from '../../src/resources/image-to-video';
@@ -68,6 +69,27 @@ describe('Midjourney resources', () => {
         enable_loop: false,
       },
     });
+  });
+
+  it('creates and gets a first-video extension without sending fixed provider fields', async () => {
+    vi.mocked(mockHttp.request).mockResolvedValue({ id: 'task-extend', status: 'processing' });
+    const resource = new ExtendVideo(mockHttp);
+
+    await resource.create({
+      source_task_id: 'task-source',
+      prompt: 'Continue the camera orbit',
+      callback_url: 'https://example.test/callback',
+    });
+    expect(mockHttp.request).toHaveBeenLastCalledWith('POST', '/api/v1/midjourney/extend_video', {
+      body: {
+        source_task_id: 'task-source',
+        prompt: 'Continue the camera orbit',
+        callback_url: 'https://example.test/callback',
+      },
+    });
+
+    await resource.get('task-extend');
+    expect(mockHttp.request).toHaveBeenLastCalledWith('GET', '/api/v1/midjourney/extend_video/task-extend', {});
   });
 
   it('runs synchronous image helpers and returns decoded results', async () => {

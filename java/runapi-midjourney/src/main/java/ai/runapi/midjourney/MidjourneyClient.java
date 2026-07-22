@@ -5,6 +5,7 @@ import ai.runapi.core.ClientOptions;
 import ai.runapi.core.http.HttpTransport;
 import java.net.URI;
 import ai.runapi.midjourney.resources.EditImageResource;
+import ai.runapi.midjourney.resources.ExtendVideoResource;
 import ai.runapi.midjourney.resources.GetSeedResource;
 import ai.runapi.midjourney.resources.ImageToPromptResource;
 import ai.runapi.midjourney.resources.ImageToVideoResource;
@@ -14,6 +15,7 @@ import ai.runapi.midjourney.resources.TextToImageResource;
 /** Midjourney model-family Java SDK client. */
 public final class MidjourneyClient extends BaseClient {
   private final EditImageResource editImage;
+  private final ExtendVideoResource extendVideo;
   private final GetSeedResource getSeed;
   private final ImageToPromptResource imageToPrompt;
   private final ImageToVideoResource imageToVideo;
@@ -23,6 +25,7 @@ public final class MidjourneyClient extends BaseClient {
   private MidjourneyClient(ClientOptions options) {
     super(options);
     this.editImage = new EditImageResource(transport(), options());
+    this.extendVideo = new ExtendVideoResource(transport(), options());
     this.getSeed = new GetSeedResource(transport(), options());
     this.imageToPrompt = new ImageToPromptResource(transport(), options());
     this.imageToVideo = new ImageToVideoResource(transport(), options());
@@ -38,6 +41,11 @@ public final class MidjourneyClient extends BaseClient {
   /** Edit Image operations. */
   public EditImageResource editImage() {
     return editImage;
+  }
+
+  /** First-video extension operations. */
+  public ExtendVideoResource extendVideo() {
+    return extendVideo;
   }
 
   /** Get Seed operations. */

@@ -112,6 +112,38 @@ func TestImageToVideoCreateAndDecode(t *testing.T) {
 	}
 }
 
+func TestExtendVideoCreateAndDecode(t *testing.T) {
+	stub := &stubHTTPClient{response: json.RawMessage(`{"id":"task_extend","status":"completed","videos":[{"url":"https://media.runapi.ai/extended.mp4"}]}`)}
+	client := NewClientWithHTTP(stub)
+
+	_, err := client.ExtendVideo.Create(context.Background(), ExtendVideoParams{
+		SourceTaskID: "task_source",
+		Prompt:       "Continue the camera orbit",
+		CallbackURL:  "https://example.test/callback",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stub.method != "POST" || stub.path != "/api/v1/midjourney/extend_video" {
+		t.Fatalf("unexpected create request: %s %s", stub.method, stub.path)
+	}
+	body := stub.body.(map[string]any)
+	if body["source_task_id"] != "task_source" || body["prompt"] != "Continue the camera orbit" || body["callback_url"] != "https://example.test/callback" {
+		t.Fatalf("unexpected body: %#v", body)
+	}
+	if body["model"] != nil || body["video_id"] != nil || body["video_index"] != nil {
+		t.Fatalf("expected only public continuation fields: %#v", body)
+	}
+
+	result, err := client.ExtendVideo.Get(context.Background(), "task_extend")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stub.path != "/api/v1/midjourney/extend_video/task_extend" || len(result.Videos) != 1 {
+		t.Fatalf("unexpected response: %#v", result)
+	}
+}
+
 func TestSynchronousHelpersPostAndDecode(t *testing.T) {
 	stub := &stubHTTPClient{response: json.RawMessage(`{"prompts":["Prompt one","Prompt two","Prompt three","Prompt four"]}`)}
 	client := NewClientWithHTTP(stub)

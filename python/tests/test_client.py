@@ -3,7 +3,7 @@ import pytest
 from runapi.core import config
 from runapi.core.errors import AuthenticationError, ValidationError
 from runapi.midjourney import MidjourneyClient
-from runapi.midjourney.resources import EditImage, GetSeed, ImageToPrompt, ImageToVideo, ShortenPrompt, TextToImage
+from runapi.midjourney.resources import EditImage, ExtendVideo, GetSeed, ImageToPrompt, ImageToVideo, ShortenPrompt, TextToImage
 from runapi.midjourney.types import GetSeedResponse, ImageToPromptResponse, ShortenPromptResponse
 
 
@@ -38,6 +38,7 @@ def test_exposes_resources_with_injected_http():
     assert isinstance(client.text_to_image, TextToImage)
     assert isinstance(client.edit_image, EditImage)
     assert isinstance(client.image_to_video, ImageToVideo)
+    assert isinstance(client.extend_video, ExtendVideo)
     assert isinstance(client.image_to_prompt, ImageToPrompt)
     assert isinstance(client.shorten_prompt, ShortenPrompt)
     assert isinstance(client.get_seed, GetSeed)
@@ -66,6 +67,11 @@ def test_async_resources_use_public_paths_and_flat_bodies():
         output_resolution="480p",
         enable_loop=False,
     )
+    client.extend_video.create(
+        source_task_id="task_source",
+        prompt="Continue the camera orbit",
+        callback_url="https://example.test/callback",
+    )
 
     assert fake.calls == [
         (
@@ -92,6 +98,15 @@ def test_async_resources_use_public_paths_and_flat_bodies():
                 "source_image_url": "https://cdn.runapi.ai/public/samples/source.png",
                 "output_resolution": "480p",
                 "enable_loop": False,
+            },
+        ),
+        (
+            "post",
+            "/api/v1/midjourney/extend_video",
+            {
+                "source_task_id": "task_source",
+                "prompt": "Continue the camera orbit",
+                "callback_url": "https://example.test/callback",
             },
         ),
     ]

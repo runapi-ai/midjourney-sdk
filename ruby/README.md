@@ -1,6 +1,6 @@
 # Midjourney Ruby SDK for RunAPI
 
-Use `runapi-midjourney` for Midjourney image generation, editing, image-to-video, image-to-prompt, prompt shortening, and seed lookup in Ruby applications and workers.
+Use `runapi-midjourney` for Midjourney image generation, editing, image-to-video, first-video extension, image-to-prompt, prompt shortening, and seed lookup in Ruby applications and workers.
 
 ## Install
 
@@ -21,7 +21,7 @@ result = client.text_to_image.run(
 puts result.images.first.url
 ```
 
-Use `create`, `get`, and `run` for `text_to_image`, `edit_image`, and `image_to_video`. Use `run` directly for `image_to_prompt`, `shorten_prompt`, and `get_seed`. Generated media URLs are temporary and should be stored in durable storage.
+Use `create`, `get`, and `run` for `text_to_image`, `edit_image`, `image_to_video`, and `extend_video`. `extend_video` accepts the task ID of an account-owned completed direct image-to-video task and continues its first video; extension tasks cannot be chained. Use `run` directly for `image_to_prompt`, `shorten_prompt`, and `get_seed`. Generated media URLs are temporary and should be stored in durable storage.
 
 ## Links
 

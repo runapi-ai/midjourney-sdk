@@ -1,6 +1,6 @@
 # Midjourney Java SDK for RunAPI
 
-Use `ai.runapi:runapi-midjourney` for typed Midjourney request builders, task polling, synchronous helpers, and response models in Java applications.
+Use `ai.runapi:runapi-midjourney` for typed Midjourney request builders, first-video extension, task polling, synchronous helpers, and response models in Java applications.
 
 ## Install
 
@@ -8,7 +8,7 @@ Gradle:
 
 ```kotlin
 dependencies {
-  implementation("ai.runapi:runapi-midjourney:0.2.0")
+  implementation("ai.runapi:runapi-midjourney:0.3.0")
 }
 ```
 
@@ -27,7 +27,7 @@ CompletedTextToImageResponse result = client.textToImage().run(
 );
 ```
 
-Use `create`, `get`, and `run` for image and video tasks. `imageToPrompt().run(...)`, `shortenPrompt().run(...)`, and `getSeed().run(...)` return synchronously. Generated media URLs are temporary and should be stored in durable storage.
+Use `create`, `get`, and `run` for image and video tasks, including `extendVideo()`. First-video extension accepts the task ID of an account-owned completed direct image-to-video task; extension tasks cannot be chained. `imageToPrompt().run(...)`, `shortenPrompt().run(...)`, and `getSeed().run(...)` return synchronously. Generated media URLs are temporary and should be stored in durable storage.
 
 ## Links
 

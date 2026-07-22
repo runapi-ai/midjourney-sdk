@@ -16,6 +16,16 @@ module RunApi
           }
         }
       },
+      "extend-video" => {
+        "models" => ["midjourney-image-to-video"],
+        "fields_by_model" => {
+          "midjourney-image-to-video" => {
+            "source_task_id" => {
+              "required" => true
+            }
+          }
+        }
+      },
       "get-seed" => {
         "models" => [],
         "fields_by_model" => {

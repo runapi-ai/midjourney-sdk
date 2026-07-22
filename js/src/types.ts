@@ -46,6 +46,13 @@ export interface MidjourneyImageToVideoParams extends AsyncTaskParams {
   enable_loop?: boolean;
 }
 
+export interface MidjourneyExtendVideoParams extends AsyncTaskParams {
+  /** Task ID of a completed Midjourney image-to-video task in the current account. */
+  source_task_id: string;
+  /** Optional description of the continuation. */
+  prompt?: string;
+}
+
 export interface MidjourneyImageToPromptParams {
   /** Source image URL to describe. */
   source_image_url: string;

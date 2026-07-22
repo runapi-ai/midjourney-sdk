@@ -37,6 +37,20 @@ RSpec.describe "Midjourney resources" do
     video.create(**video_params)
   end
 
+  it "posts and gets first-video extensions with only public fields" do
+    resource = RunApi::Midjourney::Resources::ExtendVideo.new(http)
+    params = {
+      source_task_id: "task-source",
+      prompt: "Continue the camera orbit",
+      callback_url: "https://example.test/callback"
+    }
+
+    expect(http).to receive(:request).with(:post, "/api/v1/midjourney/extend_video", body: params).and_return("id" => "t-4")
+    resource.create(**params)
+    expect(http).to receive(:request).with(:get, "/api/v1/midjourney/extend_video/t-4").and_return("id" => "t-4", "status" => "processing")
+    resource.get("t-4")
+  end
+
   it "runs synchronous helper requests" do
     image_to_prompt = RunApi::Midjourney::Resources::ImageToPrompt.new(http)
     prompt_params = {source_image_url: "https://cdn.runapi.ai/public/samples/source.png"}

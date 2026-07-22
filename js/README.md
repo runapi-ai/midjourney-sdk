@@ -1,6 +1,6 @@
 # Midjourney JavaScript SDK for RunAPI
 
-Use `@runapi.ai/midjourney` for typed Midjourney image generation, editing, image-to-video, image-to-prompt, prompt shortening, and seed lookup in JavaScript or TypeScript applications.
+Use `@runapi.ai/midjourney` for typed Midjourney image generation, editing, image-to-video, first-video extension, image-to-prompt, prompt shortening, and seed lookup in JavaScript or TypeScript applications.
 
 ## Install
 
@@ -21,7 +21,7 @@ const result = await client.textToImage.run({
 console.log(result.images[0].url);
 ```
 
-Use `create`, `get`, and `run` for `textToImage`, `editImage`, and `imageToVideo`. Use `run` directly for the synchronous `imageToPrompt`, `shortenPrompt`, and `getSeed` resources. Generated media URLs are temporary and should be stored in durable storage.
+Use `create`, `get`, and `run` for `textToImage`, `editImage`, `imageToVideo`, and `extendVideo`. `extendVideo` accepts the task ID of an account-owned completed direct image-to-video task and continues its first video; extension tasks cannot be chained. Use `run` directly for the synchronous `imageToPrompt`, `shortenPrompt`, and `getSeed` resources. Generated media URLs are temporary and should be stored in durable storage.
 
 ## Links
 

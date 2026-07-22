@@ -4,13 +4,13 @@ Dir.chdir(__dir__) do
 
   Gem::Specification.new do |spec|
     spec.name = "runapi-midjourney"
-    spec.version = "0.2.0"
+    spec.version = "0.3.0"
     spec.metadata["runapi_slug"] = "midjourney"
     spec.authors = ["RunAPI"]
     spec.email = ["contact@runapi.ai"]
 
     spec.summary = "Midjourney Ruby SDK for RunAPI"
-    spec.description = "Use `runapi-midjourney` for Midjourney image generation, editing, image-to-video, image-to-prompt, prompt shortening, and seed lookup in Ruby applications and workers."
+    spec.description = "Use `runapi-midjourney` for Midjourney image generation, editing, image-to-video, first-video extension, image-to-prompt, prompt shortening, and seed lookup in Ruby applications and workers."
     spec.homepage = "https://runapi.ai/models/midjourney"
     spec.license = "Apache-2.0"
     spec.required_ruby_version = ">= 3.1.0"
@@ -25,6 +25,6 @@ Dir.chdir(__dir__) do
     spec.extra_rdoc_files = ["README.md"]
         spec.require_paths = ["lib"]
 
-    spec.add_dependency "runapi-core", "~> 0.2.13"
+    spec.add_dependency "runapi-core", "~> 0.2.14"
   end
 end

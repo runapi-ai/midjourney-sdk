@@ -28,12 +28,21 @@ abstract class MidjourneyResource {
   }
 
   final TaskCreateResponse createTask(String action, Map<String, Object> body, RequestOptions requestOptions) {
+    return createTask(action, body, body, requestOptions);
+  }
+
+  final TaskCreateResponse createTask(
+      String action,
+      Map<String, Object> validationBody,
+      Map<String, Object> wireBody,
+      RequestOptions requestOptions) {
     Objects.requireNonNull(action, "action");
-    Objects.requireNonNull(body, "body");
+    Objects.requireNonNull(validationBody, "validationBody");
+    Objects.requireNonNull(wireBody, "wireBody");
     Objects.requireNonNull(requestOptions, "requestOptions");
-    ContractValidator.validate(action, body);
+    ContractValidator.validate(action, validationBody);
     return executor.send(
-        HttpRequest.builder(HttpMethod.POST, endpoint).body(new JsonRequestBody(body)).options(requestOptions).build(),
+        HttpRequest.builder(HttpMethod.POST, endpoint).body(new JsonRequestBody(wireBody)).options(requestOptions).build(),
         TaskCreateResponse.class);
   }
 
@@ -63,6 +72,22 @@ abstract class MidjourneyResource {
       Class<T> responseType,
       Class<C> completedType) {
     TaskCreateResponse created = createTask(action, body, requestOptions);
+    String id = requireNonBlank(created.getId(), "id");
+    T response = Poller.pollUntilComplete(
+        () -> getTask(id, requestOptions, responseType),
+        pollingInterval(requestOptions),
+        pollingMaxWait(requestOptions));
+    return Json.mapper().convertValue(response, completedType);
+  }
+
+  final <T extends TaskResponse, C extends T> C runTask(
+      String action,
+      Map<String, Object> validationBody,
+      Map<String, Object> wireBody,
+      RequestOptions requestOptions,
+      Class<T> responseType,
+      Class<C> completedType) {
+    TaskCreateResponse created = createTask(action, validationBody, wireBody, requestOptions);
     String id = requireNonBlank(created.getId(), "id");
     T response = Poller.pollUntilComplete(
         () -> getTask(id, requestOptions, responseType),

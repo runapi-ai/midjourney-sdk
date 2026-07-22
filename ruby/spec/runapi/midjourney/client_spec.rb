@@ -15,6 +15,7 @@ RSpec.describe RunApi::Midjourney::Client do
     expect(client.text_to_image).to be_a(RunApi::Midjourney::Resources::TextToImage)
     expect(client.edit_image).to be_a(RunApi::Midjourney::Resources::EditImage)
     expect(client.image_to_video).to be_a(RunApi::Midjourney::Resources::ImageToVideo)
+    expect(client.extend_video).to be_a(RunApi::Midjourney::Resources::ExtendVideo)
     expect(client.image_to_prompt).to be_a(RunApi::Midjourney::Resources::ImageToPrompt)
     expect(client.shorten_prompt).to be_a(RunApi::Midjourney::Resources::ShortenPrompt)
     expect(client.get_seed).to be_a(RunApi::Midjourney::Resources::GetSeed)

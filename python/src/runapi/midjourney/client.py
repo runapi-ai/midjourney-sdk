@@ -5,6 +5,7 @@ from typing import Any, Optional
 from runapi.core import ClientOptions, HttpClient, resolve_api_key
 
 from .resources.edit_image import EditImage
+from .resources.extend_video import ExtendVideo
 from .resources.get_seed import GetSeed
 from .resources.image_to_prompt import ImageToPrompt
 from .resources.image_to_video import ImageToVideo
@@ -21,6 +22,7 @@ class MidjourneyClient:
         http = client_options.http_client or HttpClient(client_options)
         self.text_to_image = TextToImage(http)
         self.edit_image = EditImage(http)
+        self.extend_video = ExtendVideo(http)
         self.image_to_video = ImageToVideo(http)
         self.image_to_prompt = ImageToPrompt(http)
         self.shorten_prompt = ShortenPrompt(http)
