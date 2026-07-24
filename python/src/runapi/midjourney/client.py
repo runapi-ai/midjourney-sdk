@@ -2,7 +2,7 @@
 
 from typing import Any, Optional
 
-from runapi.core import ClientOptions, HttpClient, resolve_api_key
+from runapi.core import ProviderClient
 
 from .resources.edit_image import EditImage
 from .resources.extend_video import ExtendVideo
@@ -13,13 +13,12 @@ from .resources.shorten_prompt import ShortenPrompt
 from .resources.text_to_image import TextToImage
 
 
-class MidjourneyClient:
+class MidjourneyClient(ProviderClient):
     """Midjourney image generation, editing, image-to-video, and helper client."""
 
     def __init__(self, api_key: Optional[str] = None, **options: Any) -> None:
-        resolved_api_key = resolve_api_key(api_key)
-        client_options = ClientOptions(api_key=resolved_api_key, **options)
-        http = client_options.http_client or HttpClient(client_options)
+        super().__init__(api_key, **options)
+        http = self._http
         self.text_to_image = TextToImage(http)
         self.edit_image = EditImage(http)
         self.extend_video = ExtendVideo(http)

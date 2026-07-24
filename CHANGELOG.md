@@ -1,5 +1,11 @@
 # Changelog
 
+## [python/v0.4.0](https://github.com/runapi-ai/midjourney-sdk/releases/tag/python%2Fv0.4.0) - 2026-07-24
+
+### Added
+- Expose shared Files, Account, and Pricing resources plus typed Task Billing Facts through the Provider Client.
+
+
 ## [js/v0.3.0](https://github.com/runapi-ai/midjourney-sdk/releases/tag/js%2Fv0.3.0), [ruby/v0.3.0](https://github.com/runapi-ai/midjourney-sdk/releases/tag/ruby%2Fv0.3.0), [go/v0.3.0](https://github.com/runapi-ai/midjourney-sdk/releases/tag/go%2Fv0.3.0), [python/v0.3.0](https://github.com/runapi-ai/midjourney-sdk/releases/tag/python%2Fv0.3.0), [java/v0.3.0](https://github.com/runapi-ai/midjourney-sdk/releases/tag/java%2Fv0.3.0) - 2026-07-22
 
 ### Added

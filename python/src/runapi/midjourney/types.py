@@ -34,16 +34,16 @@ class CompletedVideoTaskResponse(VideoTaskResponse):
     videos = required([lambda: MediaUrl])
 
 
-class ImageToPromptResponse(BaseModel):
+class ImageToPromptResponse(TaskResponse):
     prompts = required([str])
     error = optional(str)
 
 
-class ShortenPromptResponse(BaseModel):
+class ShortenPromptResponse(TaskResponse):
     prompts = required([str])
     error = optional(str)
 
 
-class GetSeedResponse(BaseModel):
+class GetSeedResponse(TaskResponse):
     seed = optional(int)
     error = optional(str)
