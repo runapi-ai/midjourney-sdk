@@ -64,8 +64,8 @@ Generated media URLs are temporary. Download and store results in your own durab
 ## Links
 
 - Model page: https://runapi.ai/models/midjourney
-- Product docs: https://runapi.ai/docs#midjourney
-- SDK docs: https://runapi.ai/docs#sdk-midjourney
+- Product docs: https://runapi.ai/docs/api/midjourney/text-to-image
+- SDK docs: https://runapi.ai/docs/resources/sdks
 - V8.1 text-to-image details: https://runapi.ai/models/midjourney/v8.1
 - Image editing details: https://runapi.ai/models/midjourney/edit-image
 - Image-to-video details: https://runapi.ai/models/midjourney/image-to-video
