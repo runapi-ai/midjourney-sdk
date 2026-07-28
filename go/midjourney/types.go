@@ -1,6 +1,8 @@
 // Package midjourney provides the Midjourney image and video API client.
 package midjourney
 
+import "github.com/runapi-ai/core-sdk/go/core"
+
 // TextToImageModel identifies the Midjourney text-to-image model.
 type TextToImageModel string
 
@@ -87,6 +89,7 @@ type MediaURL struct {
 
 // AsyncTaskResponse contains fields shared by Midjourney asynchronous responses.
 type AsyncTaskResponse struct {
+	core.TaskBillingFacts
 	ID       string     `json:"id"`
 	Status   TaskStatus `json:"status"`
 	Progress *int       `json:"progress,omitempty"`
@@ -114,18 +117,21 @@ type VideoTaskResponse struct {
 
 // ImageToPromptResponse contains prompt suggestions derived from an image.
 type ImageToPromptResponse struct {
+	core.TaskBillingFacts
 	Prompts []string `json:"prompts,omitempty"`
 	Error   string   `json:"error,omitempty"`
 }
 
 // ShortenPromptResponse contains concise prompt suggestions.
 type ShortenPromptResponse struct {
+	core.TaskBillingFacts
 	Prompts []string `json:"prompts,omitempty"`
 	Error   string   `json:"error,omitempty"`
 }
 
 // GetSeedResponse contains the seed associated with a generated image.
 type GetSeedResponse struct {
+	core.TaskBillingFacts
 	Seed  int64  `json:"seed,omitempty"`
 	Error string `json:"error,omitempty"`
 }

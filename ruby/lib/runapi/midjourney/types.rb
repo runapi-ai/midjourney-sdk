@@ -43,18 +43,21 @@ module RunApi
       class ImageToPromptResponse < RunApi::Core::BaseModel
         required :prompts, [String]
         optional :error, String
+        optional :billing, RunApi::Core::TaskBillingFacts
       end
 
       # Concise suggestions derived from a prompt.
       class ShortenPromptResponse < RunApi::Core::BaseModel
         required :prompts, [String]
         optional :error, String
+        optional :billing, RunApi::Core::TaskBillingFacts
       end
 
       # Seed associated with a generated image.
       class GetSeedResponse < RunApi::Core::BaseModel
         optional :seed, Integer
         optional :error, String
+        optional :billing, RunApi::Core::TaskBillingFacts
       end
     end
   end

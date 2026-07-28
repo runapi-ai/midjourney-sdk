@@ -145,7 +145,7 @@ func TestExtendVideoCreateAndDecode(t *testing.T) {
 }
 
 func TestSynchronousHelpersPostAndDecode(t *testing.T) {
-	stub := &stubHTTPClient{response: json.RawMessage(`{"prompts":["Prompt one","Prompt two","Prompt three","Prompt four"]}`)}
+	stub := &stubHTTPClient{response: json.RawMessage(`{"prompts":["Prompt one","Prompt two","Prompt three","Prompt four"],"billing":{"reservation":{"amount_cents":10}}}`)}
 	client := NewClientWithHTTP(stub)
 
 	promptResult, err := client.ImageToPrompt.Run(context.Background(), ImageToPromptParams{
@@ -157,8 +157,11 @@ func TestSynchronousHelpersPostAndDecode(t *testing.T) {
 	if stub.method != "POST" || stub.path != "/api/v1/midjourney/image_to_prompt" || len(promptResult.Prompts) != 4 {
 		t.Fatalf("unexpected image-to-prompt result: %#v", promptResult)
 	}
+	if promptResult.Billing == nil || promptResult.Billing.Reservation == nil {
+		t.Fatalf("expected billing facts: %#v", promptResult.Billing)
+	}
 
-	stub.response = json.RawMessage(`{"seed":8675309}`)
+	stub.response = json.RawMessage(`{"seed":8675309,"billing":{"reservation":{"amount_cents":10}}}`)
 	seedResult, err := client.GetSeed.Run(context.Background(), GetSeedParams{ImageID: "image_123"})
 	if err != nil {
 		t.Fatal(err)
@@ -170,8 +173,11 @@ func TestSynchronousHelpersPostAndDecode(t *testing.T) {
 	if body["image_id"] != "image_123" {
 		t.Fatalf("unexpected seed body: %#v", body)
 	}
+	if seedResult.Billing == nil || seedResult.Billing.Reservation == nil {
+		t.Fatalf("expected billing facts: %#v", seedResult.Billing)
+	}
 
-	stub.response = json.RawMessage(`{"prompts":["Concise mountain landscape"]}`)
+	stub.response = json.RawMessage(`{"prompts":["Concise mountain landscape"],"billing":{"reservation":{"amount_cents":10}}}`)
 	shortenResult, err := client.ShortenPrompt.Run(context.Background(), ShortenPromptParams{
 		Prompt: "A detailed cinematic mountain landscape",
 	})
@@ -184,5 +190,8 @@ func TestSynchronousHelpersPostAndDecode(t *testing.T) {
 	body = stub.body.(map[string]any)
 	if body["prompt"] != "A detailed cinematic mountain landscape" {
 		t.Fatalf("unexpected prompt shortening body: %#v", body)
+	}
+	if shortenResult.Billing == nil || shortenResult.Billing.Reservation == nil {
+		t.Fatalf("expected billing facts: %#v", shortenResult.Billing)
 	}
 }

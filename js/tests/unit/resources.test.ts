@@ -94,32 +94,56 @@ describe('Midjourney resources', () => {
 
   it('runs synchronous image helpers and returns decoded results', async () => {
     vi.mocked(mockHttp.request)
-      .mockResolvedValueOnce({ prompts: ['one', 'two', 'three', 'four'] })
-      .mockResolvedValueOnce({ seed: 8675309 });
+      .mockResolvedValueOnce({
+        prompts: ['one', 'two', 'three', 'four'],
+        billing: {
+          reservation: { amount_cents: 5 },
+          settlement: { charged_amount_cents: 5, amount_micro_cents: 5_000_000 },
+          refund: null,
+        },
+      })
+      .mockResolvedValueOnce({
+        seed: 8675309,
+        billing: {
+          reservation: null,
+          settlement: { charged_amount_cents: 1, amount_micro_cents: 1_000_000 },
+          refund: null,
+        },
+      });
 
     const prompts = await new ImageToPrompt(mockHttp).run({
       source_image_url: 'https://cdn.runapi.ai/public/samples/source.png',
     });
     expect(prompts.prompts).toEqual(['one', 'two', 'three', 'four']);
+    expect(prompts.billing?.reservation?.amount_cents).toBe(5);
     expect(mockHttp.request).toHaveBeenLastCalledWith('POST', '/api/v1/midjourney/image_to_prompt', {
       body: { source_image_url: 'https://cdn.runapi.ai/public/samples/source.png' },
     });
 
     const seed = await new GetSeed(mockHttp).run({ image_id: 'image-1' });
     expect(seed.seed).toBe(8675309);
+    expect(seed.billing?.settlement?.charged_amount_cents).toBe(1);
     expect(mockHttp.request).toHaveBeenLastCalledWith('POST', '/api/v1/midjourney/get_seed', {
       body: { image_id: 'image-1' },
     });
   });
 
   it('shortens a prompt and returns decoded suggestions', async () => {
-    vi.mocked(mockHttp.request).mockResolvedValueOnce({ prompts: ['Concise mountain landscape'] });
+    vi.mocked(mockHttp.request).mockResolvedValueOnce({
+      prompts: ['Concise mountain landscape'],
+      billing: {
+        reservation: null,
+        settlement: null,
+        refund: { refunded_at: '2026-07-27T00:00:00.000000Z' },
+      },
+    });
 
     const result = await new ShortenPrompt(mockHttp).run({
       prompt: 'A detailed cinematic mountain landscape',
     });
 
     expect(result.prompts).toEqual(['Concise mountain landscape']);
+    expect(result.billing?.refund?.refunded_at).toBe('2026-07-27T00:00:00.000000Z');
     expect(mockHttp.request).toHaveBeenCalledWith('POST', '/api/v1/midjourney/shorten_prompt', {
       body: { prompt: 'A detailed cinematic mountain landscape' },
     });
