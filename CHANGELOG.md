@@ -1,5 +1,11 @@
 # Changelog
 
+## [python/v0.4.1](https://github.com/runapi-ai/midjourney-sdk/releases/tag/python%2Fv0.4.1) - 2026-07-29
+
+### Fixed
+- Point package documentation metadata to the current RunAPI Developer Docs.
+
+
 ## [go/v0.3.1](https://github.com/runapi-ai/midjourney-sdk/releases/tag/go%2Fv0.3.1) - 2026-07-28
 
 ### Added
