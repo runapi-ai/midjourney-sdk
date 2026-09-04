@@ -56,8 +56,15 @@ console.log(result.images[0].url);
 - `imageToVideo`: create, get, or create-and-poll a video task from a source image.
 - `extendVideo`: extend the first video from an account-owned completed `imageToVideo` task. Extension tasks cannot be chained.
 - `imageToPrompt`: synchronously derive prompt suggestions from a source image.
-- `shortenPrompt`: synchronously turn a prompt into 1 to 5 concise suggestions.
+- `shortenPrompt`: return 1 to 5 concise suggestions, automatically following a Task Result when the request is accepted for background processing. Use `subscribe()` to receive processing and terminal Task updates.
 - `getSeed`: synchronously retrieve the seed for an account-owned completed Midjourney image.
+
+```typescript
+const result = await client.shortenPrompt.subscribe(
+  { prompt: 'A detailed cinematic mountain landscape at sunrise' },
+  ({ status }) => console.log(status),
+);
+```
 
 Generated media URLs are temporary. Download and store results in your own durable storage.
 

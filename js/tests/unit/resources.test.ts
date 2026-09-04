@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { HttpClient } from '@runapi.ai/core';
+import { createHttpClient, type HttpClient } from '@runapi.ai/core';
 import { EditImage } from '../../src/resources/edit-image';
 import { ExtendVideo } from '../../src/resources/extend-video';
 import { GetSeed } from '../../src/resources/get-seed';
@@ -144,8 +144,86 @@ describe('Midjourney resources', () => {
 
     expect(result.prompts).toEqual(['Concise mountain landscape']);
     expect(result.billing?.refund?.refunded_at).toBe('2026-07-27T00:00:00.000000Z');
-    expect(mockHttp.request).toHaveBeenCalledWith('POST', '/api/v1/midjourney/shorten_prompt', {
+    expect(mockHttp.request).toHaveBeenCalledWith('POST', '/api/v1/midjourney/shorten_prompt', expect.objectContaining({
       body: { prompt: 'A detailed cinematic mountain landscape' },
+    }));
+  });
+
+  it('runs a hybrid prompt task through its opaque Task Result location', async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        id: 'task-shorten-1',
+        status: 'processing',
+      }), {
+        status: 202,
+        headers: {
+          'content-type': 'application/json',
+          location: '/api/v1/tasks/task-shorten-1',
+          'retry-after': '0',
+        },
+      }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        id: 'task-shorten-1',
+        status: 'processing',
+      }), {
+        headers: {
+          'content-type': 'application/json',
+          'retry-after': '0',
+        },
+      }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        id: 'task-shorten-1',
+        status: 'completed',
+        response: {
+          status: 200,
+          content_type: 'application/json',
+          headers: {},
+          body: {
+            prompts: ['Concise mountain landscape'],
+            billing: { reservation: null, settlement: null, refund: null },
+          },
+        },
+      }), {
+        headers: { 'content-type': 'application/json' },
+      }));
+    const resource = new ShortenPrompt(createHttpClient({
+      apiKey: 'test-key',
+      fetch: fetchMock as typeof fetch,
+      maxRetries: 0,
+    }));
+    const updates: string[] = [];
+
+    const result = await resource.subscribe(
+      { prompt: 'A detailed cinematic mountain landscape' },
+      (task) => updates.push(task.status),
+    );
+
+    expect(result.prompts).toEqual(['Concise mountain landscape']);
+    expect(updates).toEqual(['processing', 'completed']);
+    expect(fetchMock).toHaveBeenNthCalledWith(1, expect.stringContaining('/api/v1/midjourney/shorten_prompt'), expect.objectContaining({
+      method: 'POST',
+      headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }),
+    }));
+    expect(fetchMock.mock.calls.slice(1).map(([url]) => url)).toEqual([
+      'https://runapi.ai/api/v1/tasks/task-shorten-1',
+      'https://runapi.ai/api/v1/tasks/task-shorten-1',
+    ]);
+  });
+
+  it('returns an immediate terminal prompt response without querying Task Result', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      prompts: ['Concise mountain landscape'],
+      billing: { reservation: null, settlement: null, refund: null },
+    }), { headers: { 'content-type': 'application/json' } }));
+    const resource = new ShortenPrompt(createHttpClient({
+      apiKey: 'test-key',
+      fetch: fetchMock as typeof fetch,
+      maxRetries: 0,
+    }));
+
+    await expect(resource.run({ prompt: 'A detailed cinematic mountain landscape' })).resolves.toMatchObject({
+      prompts: ['Concise mountain landscape'],
     });
+    expect(fetchMock).toHaveBeenCalledOnce();
   });
 });

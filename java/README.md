@@ -8,7 +8,7 @@ Gradle:
 
 ```kotlin
 dependencies {
-  implementation("ai.runapi:runapi-midjourney:0.3.0")
+  implementation("ai.runapi:runapi-midjourney:0.3.1")
 }
 ```
 
@@ -27,7 +27,7 @@ CompletedTextToImageResponse result = client.textToImage().run(
 );
 ```
 
-Use `create`, `get`, and `run` for image and video tasks, including `extendVideo()`. First-video extension accepts the task ID of an account-owned completed direct image-to-video task; extension tasks cannot be chained. `imageToPrompt().run(...)`, `shortenPrompt().run(...)`, and `getSeed().run(...)` return synchronously. Generated media URLs are temporary and should be stored in durable storage.
+Use `create`, `get`, and `run` for image and video tasks, including `extendVideo()`. First-video extension accepts the task ID of an account-owned completed direct image-to-video task; extension tasks cannot be chained. `imageToPrompt().run(...)` and `getSeed().run(...)` return synchronously. `shortenPrompt().run(...)` returns the same typed result whether it completes immediately or is accepted for later retrieval. To observe an accepted result directly, call `shortenPrompt().create(...).subscribe()`. Generated media URLs are temporary and should be stored in durable storage.
 
 ## Links
 

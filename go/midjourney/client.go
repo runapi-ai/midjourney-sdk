@@ -169,25 +169,94 @@ func (r *ExtendVideo) Run(ctx context.Context, params ExtendVideoParams, opts ..
 // ImageToPrompt derives prompt suggestions from an image.
 type ImageToPrompt struct{ http core.HTTPClient }
 
-// Run sends a synchronous image-to-prompt request.
+// Create submits image-to-prompt and returns either its terminal response or
+// an accepted Task that can be resumed through Subscribe.
+func (r *ImageToPrompt) Create(ctx context.Context, params ImageToPromptParams, opts ...option.RequestOption) (*core.HybridCreateResponse[ImageToPromptResponse], error) {
+	requestOptions, _ := option.ResolveRequestOptions(opts...)
+	body := core.CompactParams(params)
+	if err := core.ValidateParams(contractSchema["image-to-prompt"], body); err != nil {
+		return nil, err
+	}
+	return core.CreateHybrid[ImageToPromptResponse](ctx, r.http, imageToPromptPath, body, requestOptions)
+}
+
+// Subscribe follows an accepted image-to-prompt Task to its terminal response.
+func (r *ImageToPrompt) Subscribe(ctx context.Context, acceptance *core.HybridAcceptance, opts ...option.RequestOption) (*ImageToPromptResponse, error) {
+	requestOptions, pollingOptions := option.ResolveRequestOptions(opts...)
+	return core.SubscribeHybrid[ImageToPromptResponse](ctx, r.http, acceptance, requestOptions, pollingOptions)
+}
+
+// Run returns the same image-to-prompt response whether the endpoint completes
+// directly or first returns 202 Accepted.
 func (r *ImageToPrompt) Run(ctx context.Context, params ImageToPromptParams, opts ...option.RequestOption) (*ImageToPromptResponse, error) {
-	return runSync[ImageToPromptResponse](ctx, r.http, "image-to-prompt", imageToPromptPath, params, opts...)
+	requestOptions, pollingOptions := option.ResolveRequestOptions(opts...)
+	body := core.CompactParams(params)
+	if err := core.ValidateParams(contractSchema["image-to-prompt"], body); err != nil {
+		return nil, err
+	}
+	return core.RunHybrid[ImageToPromptResponse](ctx, r.http, imageToPromptPath, body, requestOptions, pollingOptions)
 }
 
 // ShortenPrompt derives concise suggestions from a prompt.
 type ShortenPrompt struct{ http core.HTTPClient }
 
-// Run sends a synchronous prompt shortening request.
+// Create submits prompt shortening and returns either its terminal response or
+// an accepted Task that can be resumed through Subscribe.
+func (r *ShortenPrompt) Create(ctx context.Context, params ShortenPromptParams, opts ...option.RequestOption) (*core.HybridCreateResponse[ShortenPromptResponse], error) {
+	requestOptions, _ := option.ResolveRequestOptions(opts...)
+	body := core.CompactParams(params)
+	if err := core.ValidateParams(contractSchema["shorten-prompt"], body); err != nil {
+		return nil, err
+	}
+	return core.CreateHybrid[ShortenPromptResponse](ctx, r.http, shortenPromptPath, body, requestOptions)
+}
+
+// Subscribe follows an accepted prompt-shortening Task to its terminal response.
+func (r *ShortenPrompt) Subscribe(ctx context.Context, acceptance *core.HybridAcceptance, opts ...option.RequestOption) (*ShortenPromptResponse, error) {
+	requestOptions, pollingOptions := option.ResolveRequestOptions(opts...)
+	return core.SubscribeHybrid[ShortenPromptResponse](ctx, r.http, acceptance, requestOptions, pollingOptions)
+}
+
+// Run sends prompt shortening and returns the same terminal response whether
+// the endpoint completes directly or first returns 202 Accepted.
 func (r *ShortenPrompt) Run(ctx context.Context, params ShortenPromptParams, opts ...option.RequestOption) (*ShortenPromptResponse, error) {
-	return runSync[ShortenPromptResponse](ctx, r.http, "shorten-prompt", shortenPromptPath, params, opts...)
+	requestOptions, pollingOptions := option.ResolveRequestOptions(opts...)
+	body := core.CompactParams(params)
+	if err := core.ValidateParams(contractSchema["shorten-prompt"], body); err != nil {
+		return nil, err
+	}
+	return core.RunHybrid[ShortenPromptResponse](ctx, r.http, shortenPromptPath, body, requestOptions, pollingOptions)
 }
 
 // GetSeed looks up the seed for an account-owned generated image.
 type GetSeed struct{ http core.HTTPClient }
 
-// Run sends a synchronous seed lookup request.
+// Create submits a seed lookup and returns either its terminal response or an
+// accepted Task that can be resumed through Subscribe.
+func (r *GetSeed) Create(ctx context.Context, params GetSeedParams, opts ...option.RequestOption) (*core.HybridCreateResponse[GetSeedResponse], error) {
+	requestOptions, _ := option.ResolveRequestOptions(opts...)
+	body := core.CompactParams(params)
+	if err := core.ValidateParams(contractSchema["get-seed"], body); err != nil {
+		return nil, err
+	}
+	return core.CreateHybrid[GetSeedResponse](ctx, r.http, getSeedPath, body, requestOptions)
+}
+
+// Subscribe follows an accepted seed-lookup Task to its terminal response.
+func (r *GetSeed) Subscribe(ctx context.Context, acceptance *core.HybridAcceptance, opts ...option.RequestOption) (*GetSeedResponse, error) {
+	requestOptions, pollingOptions := option.ResolveRequestOptions(opts...)
+	return core.SubscribeHybrid[GetSeedResponse](ctx, r.http, acceptance, requestOptions, pollingOptions)
+}
+
+// Run returns the same seed response whether the endpoint completes directly
+// or first returns 202 Accepted.
 func (r *GetSeed) Run(ctx context.Context, params GetSeedParams, opts ...option.RequestOption) (*GetSeedResponse, error) {
-	return runSync[GetSeedResponse](ctx, r.http, "get-seed", getSeedPath, params, opts...)
+	requestOptions, pollingOptions := option.ResolveRequestOptions(opts...)
+	body := core.CompactParams(params)
+	if err := core.ValidateParams(contractSchema["get-seed"], body); err != nil {
+		return nil, err
+	}
+	return core.RunHybrid[GetSeedResponse](ctx, r.http, getSeedPath, body, requestOptions, pollingOptions)
 }
 
 func createAsync[T any](ctx context.Context, httpClient core.HTTPClient, action, path string, params T, opts ...option.RequestOption) (*core.TaskCreateResponse, error) {
@@ -202,13 +271,4 @@ func createAsync[T any](ctx context.Context, httpClient core.HTTPClient, action,
 func getAsync[T any](ctx context.Context, httpClient core.HTTPClient, path, id string, opts ...option.RequestOption) (*T, error) {
 	requestOptions, _ := option.ResolveRequestOptions(opts...)
 	return core.GetJSON[T](ctx, httpClient, core.ResourcePath(path, id), requestOptions)
-}
-
-func runSync[R any, P any](ctx context.Context, httpClient core.HTTPClient, action, path string, params P, opts ...option.RequestOption) (*R, error) {
-	requestOptions, _ := option.ResolveRequestOptions(opts...)
-	body := core.CompactParams(params)
-	if err := core.ValidateParams(contractSchema[action], body); err != nil {
-		return nil, err
-	}
-	return core.PostJSON[R](ctx, httpClient, path, body, requestOptions)
 }

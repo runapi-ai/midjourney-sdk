@@ -15,4 +15,4 @@ class GetSeed(Resource):
     def run(self, options: Optional[RequestOptions] = None, **params: Any) -> Any:
         compacted = self._compact_params(params)
         self._validate_contract(CONTRACT["get-seed"], compacted)
-        return self._request("post", self.ENDPOINT, body=compacted, options=options)
+        return self._run_hybrid("post", self.ENDPOINT, body=compacted, options=options)

@@ -1,5 +1,31 @@
 # Changelog
 
+## [python/v0.5.0](https://github.com/runapi-ai/midjourney-sdk/releases/tag/python%2Fv0.5.0) - 2026-09-04
+
+### Added
+- Automatically follow accepted Task results for image-to-prompt, prompt shortening, and seed lookup.
+
+## [go/v0.4.0](https://github.com/runapi-ai/midjourney-sdk/releases/tag/go%2Fv0.4.0) - 2026-09-04
+
+### Added
+- Add Create, Subscribe, and automatic Run support for image-to-prompt, prompt shortening, and seed lookup when a Task is accepted.
+
+## [js/v0.3.2](https://github.com/runapi-ai/midjourney-sdk/releases/tag/js%2Fv0.3.2) - 2026-09-04
+
+### Added
+- Let prompt shortening run through accepted Task Results and report lifecycle updates with subscribe().
+
+## [java/v0.3.1](https://github.com/runapi-ai/midjourney-sdk/releases/tag/java%2Fv0.3.1) - 2026-09-04
+
+### Changed
+- Let Java prompt shortening return the same typed terminal result after an immediate response or an accepted Task Result subscription.
+
+## [ruby/v0.4.0](https://github.com/runapi-ai/midjourney-sdk/releases/tag/ruby%2Fv0.4.0) - 2026-09-04
+
+### Added
+- Add run and subscribe support for hybrid Task responses.
+
+
 ## [ruby/v0.3.2](https://github.com/runapi-ai/midjourney-sdk/releases/tag/ruby%2Fv0.3.2) - 2026-08-18
 
 ### Changed

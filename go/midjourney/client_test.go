@@ -3,9 +3,13 @@ package midjourney
 import (
 	"context"
 	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/runapi-ai/core-sdk/go/core"
+	"github.com/runapi-ai/core-sdk/go/option"
 )
 
 type stubHTTPClient struct {
@@ -13,6 +17,58 @@ type stubHTTPClient struct {
 	path     string
 	body     any
 	response json.RawMessage
+}
+
+func TestShortenPromptRunFollowsAcceptedTaskLocation(t *testing.T) {
+	var idempotencyKey string
+	requests := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests++
+		switch requests {
+		case 1:
+			if r.Method != http.MethodPost || r.URL.Path != "/api/v1/midjourney/shorten_prompt" {
+				t.Fatalf("unexpected create request: %s %s", r.Method, r.URL.Path)
+			}
+			idempotencyKey = r.Header.Get("Idempotency-Key")
+			if idempotencyKey == "" {
+				t.Fatal("expected an idempotency key")
+			}
+			w.Header().Set("Location", "/api/v1/tasks/tsk_123")
+			w.Header().Set("Retry-After", "0")
+			w.WriteHeader(http.StatusAccepted)
+			_, _ = w.Write([]byte(`{"id":"tsk_123","status":"processing"}`))
+		case 2:
+			if r.URL.String() != "/api/v1/tasks/tsk_123" {
+				t.Fatalf("expected opaque task location, got %s", r.URL)
+			}
+			w.Header().Set("Retry-After", "0")
+			_, _ = w.Write([]byte(`{"id":"tsk_123","status":"processing"}`))
+		case 3:
+			_, _ = w.Write([]byte(`{"id":"tsk_123","status":"completed","response":{"status":200,"content_type":"application/json","headers":{},"body":{"prompts":["Concise mountain landscape"]}}}`))
+		default:
+			t.Fatalf("unexpected request %d", requests)
+		}
+	}))
+	defer server.Close()
+
+	client, err := NewClient(
+		option.WithAPIKey("test-key"),
+		option.WithBaseURL(server.URL),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := client.ShortenPrompt.Run(context.Background(), ShortenPromptParams{Prompt: "A detailed cinematic mountain landscape"}, option.WithPollInterval(time.Millisecond))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Prompts) != 1 || result.Prompts[0] != "Concise mountain landscape" {
+		t.Fatalf("unexpected terminal result: %#v", result)
+	}
+	if idempotencyKey == "" {
+		t.Fatal("expected retained idempotency key")
+	}
 }
 
 func (s *stubHTTPClient) Request(_ context.Context, method, path string, opts *core.HTTPRequestOptions) (json.RawMessage, error) {
@@ -25,6 +81,14 @@ func (s *stubHTTPClient) Request(_ context.Context, method, path string, opts *c
 		return s.response, nil
 	}
 	return json.RawMessage(`{"id":"task_123","status":"processing"}`), nil
+}
+
+func (s *stubHTTPClient) RequestWithResponse(ctx context.Context, method, path string, opts *core.HTTPRequestOptions) (*core.HTTPResponse, error) {
+	payload, err := s.Request(ctx, method, path, opts)
+	if err != nil {
+		return nil, err
+	}
+	return &core.HTTPResponse{Body: payload, StatusCode: http.StatusOK, Header: make(http.Header)}, nil
 }
 
 func TestTextToImageCreateAndGet(t *testing.T) {

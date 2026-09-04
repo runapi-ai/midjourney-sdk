@@ -21,7 +21,7 @@ result = client.text_to_image.run(
 print(result.images[0].url)
 ```
 
-Use `create`, `get`, and `run` for `text_to_image`, `edit_image`, `image_to_video`, and `extend_video`. `extend_video` accepts the task ID of an account-owned completed direct image-to-video task and continues its first video; extension tasks cannot be chained. Use `run` directly for `image_to_prompt`, `shorten_prompt`, and `get_seed`. Generated media URLs are temporary and should be stored in durable storage.
+Use `create`, `get`, and `run` for `text_to_image`, `edit_image`, `image_to_video`, and `extend_video`. `extend_video` accepts the task ID of an account-owned completed direct image-to-video task and continues its first video; extension tasks cannot be chained. Use `run` directly for `image_to_prompt`, `shorten_prompt`, and `get_seed`; it returns the same typed terminal result whether the request completes directly or is accepted for background processing. Call `subscribe(location)` on one of these resources to resume an accepted request from its opaque Task Result URL. Generated media URLs are temporary and should be stored in durable storage.
 
 ## Links
 

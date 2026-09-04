@@ -11,6 +11,7 @@ import ai.runapi.core.http.HttpResponse;
 import ai.runapi.core.http.HttpTransport;
 import ai.runapi.core.http.JsonRequestBody;
 import ai.runapi.core.json.Json;
+import ai.runapi.core.polling.Task;
 import ai.runapi.midjourney.types.CompletedTextToImageResponse;
 import ai.runapi.midjourney.types.TextToImageResponse;
 import ai.runapi.midjourney.types.CompletedEditImageResponse;
@@ -36,7 +37,11 @@ import ai.runapi.midjourney.types.TextToImageResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.ByteArrayOutputStream;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class MidjourneyClientTest {
@@ -285,6 +290,25 @@ class MidjourneyClientTest {
     }
 
     @Test
+    void shortensPromptThroughAnAcceptedTaskWithoutChangingTheResultType() {
+      HybridSequenceTransport transport = new HybridSequenceTransport(
+          response(202, "{\"id\":\"tsk_shorten\",\"status\":\"processing\"}", headers("Location", "https://api.example.test/tasks/opaque-result", "Retry-After", "0")),
+          response(200, "{\"id\":\"tsk_shorten\",\"status\":\"completed\",\"response\":{\"status\":200,\"content_type\":\"application/json\",\"headers\":{},\"body\":{\"prompts\":[\"Concise mountain landscape\"]}}}", Collections.<String, String>emptyMap()));
+      MidjourneyClient client = MidjourneyClient.builder().apiKey("sk-test").transport(transport).build();
+
+      Task<ShortenPromptResponse> task = client.shortenPrompt().create(
+          ShortenPromptParams.builder().prompt("A detailed cinematic mountain landscape").build(),
+          RequestOptions.builder().pollingInterval(Duration.ofMillis(1)).pollingMaxWait(Duration.ofSeconds(1)).build());
+      ShortenPromptResponse response = task.subscribe();
+
+      assertEquals("tsk_shorten", task.getId());
+      assertEquals("https://api.example.test/tasks/opaque-result", task.getLocation());
+      assertEquals("Concise mountain landscape", response.getPrompts().get(0));
+      assertNotNull(transport.requests.get(0).getHeaders().get("Idempotency-Key"));
+      assertEquals("https://api.example.test/tasks/opaque-result", transport.requests.get(1).getPath());
+    }
+
+    @Test
     void coversImagetovideoResourceMethods() {
       CapturingTransport createTransport = new CapturingTransport("{\"id\":\"task_image_to_video\",\"status\":\"processing\"}");
       MidjourneyClient createClient = MidjourneyClient.builder().apiKey("sk-test").transport(createTransport).build();
@@ -400,6 +424,22 @@ class MidjourneyClientTest {
     return Json.mapper().readTree(out.toByteArray());
   }
 
+  private static HttpResponse response(int status, String body, Map<String, String> headers) {
+    Map<String, List<String>> values = new LinkedHashMap<String, List<String>>();
+    for (Map.Entry<String, String> header : headers.entrySet()) {
+      values.put(header.getKey(), Collections.singletonList(header.getValue()));
+    }
+    return new HttpResponse(status, body, values);
+  }
+
+  private static Map<String, String> headers(String... values) {
+    Map<String, String> headers = new LinkedHashMap<String, String>();
+    for (int index = 0; index < values.length; index += 2) {
+      headers.put(values[index], values[index + 1]);
+    }
+    return headers;
+  }
+
   private static final class CapturingTransport implements HttpTransport {
     private final String body;
     private HttpRequest request;
@@ -428,6 +468,23 @@ class MidjourneyClientTest {
       String response = responses[Math.min(calls, responses.length - 1)];
       calls++;
       return new HttpResponse(200, response, Collections.<String, java.util.List<String>>emptyMap());
+    }
+
+    public void close() {}
+  }
+
+  private static final class HybridSequenceTransport implements HttpTransport {
+    private final HttpResponse[] responses;
+    private final List<HttpRequest> requests = new ArrayList<HttpRequest>();
+    private int calls;
+
+    private HybridSequenceTransport(HttpResponse... responses) {
+      this.responses = responses;
+    }
+
+    public HttpResponse send(HttpRequest request) {
+      requests.add(request);
+      return responses[Math.min(calls++, responses.length - 1)];
     }
 
     public void close() {}

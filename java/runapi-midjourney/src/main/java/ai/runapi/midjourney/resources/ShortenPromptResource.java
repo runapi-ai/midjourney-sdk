@@ -3,6 +3,7 @@ package ai.runapi.midjourney.resources;
 import ai.runapi.core.ClientOptions;
 import ai.runapi.core.RequestOptions;
 import ai.runapi.core.http.HttpTransport;
+import ai.runapi.core.polling.Task;
 import ai.runapi.midjourney.types.ShortenPromptParams;
 import ai.runapi.midjourney.types.ShortenPromptResponse;
 
@@ -16,6 +17,16 @@ public final class ShortenPromptResource extends MidjourneyResource {
     super(transport, options, ENDPOINT);
   }
 
+  /** Starts prompt shortening and returns a terminal result or an accepted Task. */
+  public Task<ShortenPromptResponse> create(ShortenPromptParams params) {
+    return create(params, RequestOptions.none());
+  }
+
+  /** Starts prompt shortening with per-request options. */
+  public Task<ShortenPromptResponse> create(ShortenPromptParams params, RequestOptions options) {
+    return createHybridTask(params.action(), params.toMap(), options, ShortenPromptResponse.class);
+  }
+
   /** Shortens a prompt and returns concise suggestions. */
   public ShortenPromptResponse run(ShortenPromptParams params) {
     return run(params, RequestOptions.none());
@@ -23,6 +34,6 @@ public final class ShortenPromptResource extends MidjourneyResource {
 
   /** Shortens a prompt with per-request options and returns concise suggestions. */
   public ShortenPromptResponse run(ShortenPromptParams params, RequestOptions options) {
-    return runSync(params.action(), params.toMap(), options, ShortenPromptResponse.class);
+    return create(params, options).subscribe();
   }
 }

@@ -1,6 +1,6 @@
 import pytest
 
-from runapi.core import config
+from runapi.core import ApiResponse, config
 from runapi.core.errors import AuthenticationError, ValidationError
 from runapi.midjourney import MidjourneyClient
 from runapi.midjourney.resources import EditImage, ExtendVideo, GetSeed, ImageToPrompt, ImageToVideo, ShortenPrompt, TextToImage
@@ -11,9 +11,11 @@ class FakeHttp:
     def __init__(self, *responses):
         self._responses = list(responses)
         self.calls = []
+        self.options = []
 
     def request(self, method, path, body=None, options=None):
         self.calls.append((method, path, body))
+        self.options.append(options)
         if self._responses:
             return self._responses.pop(0)
         return {"id": "task_1", "status": "processing"}
@@ -112,7 +114,7 @@ def test_async_resources_use_public_paths_and_flat_bodies():
     ]
 
 
-def test_synchronous_helpers_decode_responses():
+def test_hybrid_helpers_decode_direct_responses():
     fake = FakeHttp(
         {"prompts": ["one", "two", "three", "four"]},
         {"prompts": ["Concise mountain landscape"]},
@@ -135,6 +137,61 @@ def test_synchronous_helpers_decode_responses():
     )
     assert isinstance(seed, GetSeedResponse)
     assert seed.seed == 8675309
+
+
+@pytest.mark.parametrize(
+    ("resource_name", "params", "endpoint", "terminal_body", "response_class"),
+    [
+        (
+            "image_to_prompt",
+            {"source_image_url": "https://cdn.runapi.ai/public/samples/source.png"},
+            "/api/v1/midjourney/image_to_prompt",
+            {"prompts": ["one", "two", "three", "four"]},
+            ImageToPromptResponse,
+        ),
+        (
+            "shorten_prompt",
+            {"prompt": "A detailed cinematic mountain landscape"},
+            "/api/v1/midjourney/shorten_prompt",
+            {"prompts": ["Concise mountain landscape"]},
+            ShortenPromptResponse,
+        ),
+        (
+            "get_seed",
+            {"image_id": "image-1"},
+            "/api/v1/midjourney/get_seed",
+            {"seed": 8675309},
+            GetSeedResponse,
+        ),
+    ],
+)
+def test_hybrid_helpers_follow_accepted_task_result(
+    resource_name, params, endpoint, terminal_body, response_class
+):
+    location = "https://runapi.ai/api/v1/tasks/task_1"
+    fake = FakeHttp(
+        ApiResponse({"id": "task_1", "status": "processing"}, {"Location": location}, status_code=202),
+        ApiResponse(
+            {
+                "id": "task_1",
+                "status": "completed",
+                "response": {
+                    "status": 200,
+                    "content_type": "application/json",
+                    "headers": {},
+                    "body": terminal_body,
+                },
+            }
+        ),
+    )
+    client = MidjourneyClient(api_key="k", http_client=fake)
+
+    result = getattr(client, resource_name).run(**params)
+
+    assert isinstance(result, response_class)
+    assert [call[:2] for call in fake.calls] == [("post", endpoint), ("get", location)]
+    assert fake.options[0].headers["Idempotency-Key"]
+    assert fake.options[1].headers == fake.options[0].headers
 
 
 def test_get_seed_preserves_error_response_without_seed():
