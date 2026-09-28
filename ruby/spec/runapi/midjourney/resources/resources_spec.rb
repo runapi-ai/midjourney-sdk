@@ -55,19 +55,15 @@ RSpec.describe "Midjourney resources" do
     image_to_prompt = RunApi::Midjourney::Resources::ImageToPrompt.new(http)
     prompt_params = {source_image_url: "https://cdn.runapi.ai/public/samples/source.png"}
     expect(http).to receive(:request).with(:post, "/api/v1/midjourney/image_to_prompt", body: prompt_params, options: anything)
-      .and_return("prompts" => %w[one two three four], "billing" => {"reservation" => {"amount_cents" => 5}, "settlement" => {"charged_amount_cents" => 5, "amount_micro_cents" => 5_000_000}, "refund" => nil})
+      .and_return("prompts" => %w[one two three four])
     image_to_prompt_result = image_to_prompt.run(**prompt_params)
     expect(image_to_prompt_result.prompts).to eq(%w[one two three four])
-    expect(image_to_prompt_result.billing).to be_a(RunApi::Core::TaskBillingFacts)
-    expect(image_to_prompt_result.billing.reservation.amount_cents).to eq(5)
 
     get_seed = RunApi::Midjourney::Resources::GetSeed.new(http)
     expect(http).to receive(:request).with(:post, "/api/v1/midjourney/get_seed", body: {image_id: "image-1"}, options: anything)
-      .and_return("seed" => 8675309, "billing" => {"reservation" => nil, "settlement" => {"charged_amount_cents" => 1, "amount_micro_cents" => 1_000_000}, "refund" => nil})
+      .and_return("seed" => 8675309)
     get_seed_result = get_seed.run(image_id: "image-1")
     expect(get_seed_result.seed).to eq(8675309)
-    expect(get_seed_result.billing).to be_a(RunApi::Core::TaskBillingFacts)
-    expect(get_seed_result.billing.settlement.charged_amount_cents).to eq(1)
 
     shorten_prompt = RunApi::Midjourney::Resources::ShortenPrompt.new(http)
     expect(http).to receive(:request) do |method, path, body:, options:|
@@ -77,29 +73,27 @@ RSpec.describe "Midjourney resources" do
         {prompt: "A detailed cinematic mountain landscape"}
       ])
       expect(options.headers.fetch("Idempotency-Key")).to match(/\A[0-9a-f-]{36}\z/)
-    end.and_return("prompts" => ["Concise mountain landscape"], "billing" => {"reservation" => nil, "settlement" => nil, "refund" => {"refunded_at" => "2026-07-27T00:00:00.000000Z"}})
+    end.and_return("prompts" => ["Concise mountain landscape"])
     shorten_prompt_result = shorten_prompt.run(prompt: "A detailed cinematic mountain landscape")
     expect(shorten_prompt_result.prompts)
       .to eq(["Concise mountain landscape"])
-    expect(shorten_prompt_result.billing).to be_a(RunApi::Core::TaskBillingFacts)
-    expect(shorten_prompt_result.billing.refund.refunded_at).to eq("2026-07-27T00:00:00.000000Z")
   end
 
   it "follows an accepted shorten prompt task to its terminal response" do
     client = RunApi::Core::HttpClient.new(
       RunApi::Core::ClientOptions.new(
         api_key: "test-key",
-        base_url: "https://api.runapi.ai",
+        base_url: "https://runapi.ai",
         max_retries: 1,
         retry_base_delay: 0,
         retry_max_delay: 0
       )
     )
     resource = RunApi::Midjourney::Resources::ShortenPrompt.new(client)
-    location = "https://api.runapi.ai/api/v1/tasks/task-1/result"
+    location = "https://runapi.ai/api/v1/tasks/task-1/result"
     idempotency_keys = []
 
-    stub_request(:post, "https://api.runapi.ai/api/v1/midjourney/shorten_prompt")
+    stub_request(:post, "https://runapi.ai/api/v1/midjourney/shorten_prompt")
       .to_return do |request|
         idempotency_keys << request.headers["Idempotency-Key"]
         if idempotency_keys.one?
@@ -125,7 +119,7 @@ RSpec.describe "Midjourney resources" do
         },
         {
           status: 200,
-          body: '{"id":"task-1","status":"completed","response":{"status":200,"content_type":"application/json","headers":{},"body":{"prompts":["Concise mountain landscape"],"billing":{"reservation":null,"settlement":null,"refund":null}}}}',
+          body: '{"id":"task-1","status":"completed","response":{"status":200,"content_type":"application/json","headers":{},"body":{"prompts":["Concise mountain landscape"]}},"usage":{"cost":0.05}}',
           headers: {"Content-Type" => "application/json"}
         }
       )
@@ -135,7 +129,7 @@ RSpec.describe "Midjourney resources" do
     expect(result).to be_a(RunApi::Midjourney::Types::ShortenPromptResponse)
     expect(result.prompts).to eq(["Concise mountain landscape"])
     expect(
-      a_request(:post, "https://api.runapi.ai/api/v1/midjourney/shorten_prompt")
+      a_request(:post, "https://runapi.ai/api/v1/midjourney/shorten_prompt")
         .with { |request| request.headers["Idempotency-Key"].to_s.match?(/\A[0-9a-f-]{36}\z/) }
     ).to have_been_made.twice
     expect(idempotency_keys.uniq).to have_attributes(length: 1)
@@ -143,12 +137,12 @@ RSpec.describe "Midjourney resources" do
 
   it "subscribes to processing and terminal shorten prompt results" do
     client = RunApi::Core::HttpClient.new(
-      RunApi::Core::ClientOptions.new(api_key: "test-key", base_url: "https://api.runapi.ai")
+      RunApi::Core::ClientOptions.new(api_key: "test-key", base_url: "https://runapi.ai")
     )
     resource = RunApi::Midjourney::Resources::ShortenPrompt.new(client)
-    location = "https://api.runapi.ai/api/v1/tasks/task-1/result"
+    location = "https://runapi.ai/api/v1/tasks/task-1/result"
 
-    stub_request(:post, "https://api.runapi.ai/api/v1/midjourney/shorten_prompt")
+    stub_request(:post, "https://runapi.ai/api/v1/midjourney/shorten_prompt")
       .to_return(
         status: 202,
         body: '{"id":"task-1","status":"processing"}',
@@ -163,7 +157,7 @@ RSpec.describe "Midjourney resources" do
         },
         {
           status: 200,
-          body: '{"id":"task-1","status":"completed","response":{"status":200,"content_type":"application/json","headers":{},"body":{"prompts":["Concise mountain landscape"],"billing":{"reservation":null,"settlement":null,"refund":null}}}}',
+          body: '{"id":"task-1","status":"completed","response":{"status":200,"content_type":"application/json","headers":{},"body":{"prompts":["Concise mountain landscape"]}},"usage":{"cost":0.05}}',
           headers: {"Content-Type" => "application/json"}
         }
       )
@@ -178,7 +172,7 @@ RSpec.describe "Midjourney resources" do
 
   it "raises a stable error for a failed accepted task" do
     shorten_prompt = RunApi::Midjourney::Resources::ShortenPrompt.new(http)
-    location = "https://api.runapi.ai/api/v1/tasks/task-1/result"
+    location = "https://runapi.ai/api/v1/tasks/task-1/result"
     allow(http).to receive(:request).and_return(
       RunApi::Core::Response.new(
         body: {"id" => "task-1", "status" => "processing"},

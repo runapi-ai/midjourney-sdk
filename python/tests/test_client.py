@@ -89,8 +89,7 @@ def test_async_resources_use_public_paths_and_flat_bodies():
                 "model": "midjourney-edit-image",
                 "prompt": "Change the vase color",
                 "source_image_url": "https://cdn.runapi.ai/public/samples/source.png",
-                "mask_url": "https://cdn.runapi.ai/public/samples/mask.png",
-            },
+                "mask_url": "https://cdn.runapi.ai/public/samples/mask.png"},
         ),
         (
             "post",
@@ -99,8 +98,7 @@ def test_async_resources_use_public_paths_and_flat_bodies():
                 "model": "midjourney-image-to-video",
                 "source_image_url": "https://cdn.runapi.ai/public/samples/source.png",
                 "output_resolution": "480p",
-                "enable_loop": False,
-            },
+                "enable_loop": False},
         ),
         (
             "post",
@@ -108,10 +106,8 @@ def test_async_resources_use_public_paths_and_flat_bodies():
             {
                 "source_task_id": "task_source",
                 "prompt": "Continue the camera orbit",
-                "callback_url": "https://example.test/callback",
-            },
-        ),
-    ]
+                "callback_url": "https://example.test/callback"},
+        )]
 
 
 def test_hybrid_helpers_decode_direct_responses():
@@ -162,8 +158,7 @@ def test_hybrid_helpers_decode_direct_responses():
             "/api/v1/midjourney/get_seed",
             {"seed": 8675309},
             GetSeedResponse,
-        ),
-    ],
+        )],
 )
 def test_hybrid_helpers_follow_accepted_task_result(
     resource_name, params, endpoint, terminal_body, response_class
@@ -174,14 +169,12 @@ def test_hybrid_helpers_follow_accepted_task_result(
         ApiResponse(
             {
                 "id": "task_1",
-                "status": "completed",
+                "status": "completed", "usage": {"cost": 0.05},
                 "response": {
                     "status": 200,
                     "content_type": "application/json",
                     "headers": {},
-                    "body": terminal_body,
-                },
-            }
+                    "body": terminal_body}}
         ),
     )
     client = MidjourneyClient(api_key="k", http_client=fake)

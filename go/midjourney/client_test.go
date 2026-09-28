@@ -44,7 +44,7 @@ func TestShortenPromptRunFollowsAcceptedTaskLocation(t *testing.T) {
 			w.Header().Set("Retry-After", "0")
 			_, _ = w.Write([]byte(`{"id":"tsk_123","status":"processing"}`))
 		case 3:
-			_, _ = w.Write([]byte(`{"id":"tsk_123","status":"completed","response":{"status":200,"content_type":"application/json","headers":{},"body":{"prompts":["Concise mountain landscape"]}}}`))
+			_, _ = w.Write([]byte(`{"id":"tsk_123","status":"completed", "usage": {"cost": 0.05},"response":{"status":200,"content_type":"application/json","headers":{},"body":{"prompts":["Concise mountain landscape"]}}}`))
 		default:
 			t.Fatalf("unexpected request %d", requests)
 		}
@@ -101,8 +101,7 @@ func TestTextToImageCreateAndGet(t *testing.T) {
 		Model:                   ModelV81,
 		Prompt:                  "A cobalt vase on white marble",
 		EnablePromptTranslation: &translate,
-		IncludeSplitImages:      &split,
-	})
+		IncludeSplitImages:      &split})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -134,8 +133,7 @@ func TestEditImageCreateSendsSourceAndMask(t *testing.T) {
 		Model:          ModelEditImage,
 		Prompt:         "Change the vase color to cobalt blue",
 		SourceImageURL: "https://cdn.runapi.ai/public/samples/source.png",
-		MaskURL:        "https://cdn.runapi.ai/public/samples/mask.png",
-	})
+		MaskURL:        "https://cdn.runapi.ai/public/samples/mask.png"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -149,7 +147,7 @@ func TestEditImageCreateSendsSourceAndMask(t *testing.T) {
 }
 
 func TestImageToVideoCreateAndDecode(t *testing.T) {
-	stub := &stubHTTPClient{response: json.RawMessage(`{"id":"task_123","status":"completed","video_id":"video_1","videos":[{"url":"https://media.runapi.ai/video.mp4"}]}`)}
+	stub := &stubHTTPClient{response: json.RawMessage(`{"id":"task_123","status":"completed", "usage": {"cost": 0.05},"video_id":"video_1","videos":[{"url":"https://media.runapi.ai/video.mp4"}]}`)}
 	client := NewClientWithHTTP(stub)
 	loop := false
 
@@ -158,8 +156,7 @@ func TestImageToVideoCreateAndDecode(t *testing.T) {
 		Prompt:           "Slow cinematic orbit",
 		SourceImageURL:   "https://cdn.runapi.ai/public/samples/source.png",
 		OutputResolution: Resolution480P,
-		EnableLoop:       &loop,
-	})
+		EnableLoop:       &loop})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -177,14 +174,13 @@ func TestImageToVideoCreateAndDecode(t *testing.T) {
 }
 
 func TestExtendVideoCreateAndDecode(t *testing.T) {
-	stub := &stubHTTPClient{response: json.RawMessage(`{"id":"task_extend","status":"completed","videos":[{"url":"https://media.runapi.ai/extended.mp4"}]}`)}
+	stub := &stubHTTPClient{response: json.RawMessage(`{"id":"task_extend","status":"completed", "usage": {"cost": 0.05},"videos":[{"url":"https://media.runapi.ai/extended.mp4"}]}`)}
 	client := NewClientWithHTTP(stub)
 
 	_, err := client.ExtendVideo.Create(context.Background(), ExtendVideoParams{
 		SourceTaskID: "task_source",
 		Prompt:       "Continue the camera orbit",
-		CallbackURL:  "https://example.test/callback",
-	})
+		CallbackURL:  "https://example.test/callback"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -209,23 +205,19 @@ func TestExtendVideoCreateAndDecode(t *testing.T) {
 }
 
 func TestSynchronousHelpersPostAndDecode(t *testing.T) {
-	stub := &stubHTTPClient{response: json.RawMessage(`{"prompts":["Prompt one","Prompt two","Prompt three","Prompt four"],"billing":{"reservation":{"amount_cents":10}}}`)}
+	stub := &stubHTTPClient{response: json.RawMessage(`{"prompts":["Prompt one","Prompt two","Prompt three","Prompt four"]}`)}
 	client := NewClientWithHTTP(stub)
 
 	promptResult, err := client.ImageToPrompt.Run(context.Background(), ImageToPromptParams{
-		SourceImageURL: "https://cdn.runapi.ai/public/samples/source.png",
-	})
+		SourceImageURL: "https://cdn.runapi.ai/public/samples/source.png"})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if stub.method != "POST" || stub.path != "/api/v1/midjourney/image_to_prompt" || len(promptResult.Prompts) != 4 {
 		t.Fatalf("unexpected image-to-prompt result: %#v", promptResult)
 	}
-	if promptResult.Billing == nil || promptResult.Billing.Reservation == nil {
-		t.Fatalf("expected billing facts: %#v", promptResult.Billing)
-	}
 
-	stub.response = json.RawMessage(`{"seed":8675309,"billing":{"reservation":{"amount_cents":10}}}`)
+	stub.response = json.RawMessage(`{"seed":8675309}`)
 	seedResult, err := client.GetSeed.Run(context.Background(), GetSeedParams{ImageID: "image_123"})
 	if err != nil {
 		t.Fatal(err)
@@ -237,14 +229,10 @@ func TestSynchronousHelpersPostAndDecode(t *testing.T) {
 	if body["image_id"] != "image_123" {
 		t.Fatalf("unexpected seed body: %#v", body)
 	}
-	if seedResult.Billing == nil || seedResult.Billing.Reservation == nil {
-		t.Fatalf("expected billing facts: %#v", seedResult.Billing)
-	}
 
-	stub.response = json.RawMessage(`{"prompts":["Concise mountain landscape"],"billing":{"reservation":{"amount_cents":10}}}`)
+	stub.response = json.RawMessage(`{"prompts":["Concise mountain landscape"]}`)
 	shortenResult, err := client.ShortenPrompt.Run(context.Background(), ShortenPromptParams{
-		Prompt: "A detailed cinematic mountain landscape",
-	})
+		Prompt: "A detailed cinematic mountain landscape"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -254,8 +242,5 @@ func TestSynchronousHelpersPostAndDecode(t *testing.T) {
 	body = stub.body.(map[string]any)
 	if body["prompt"] != "A detailed cinematic mountain landscape" {
 		t.Fatalf("unexpected prompt shortening body: %#v", body)
-	}
-	if shortenResult.Billing == nil || shortenResult.Billing.Reservation == nil {
-		t.Fatalf("expected billing facts: %#v", shortenResult.Billing)
 	}
 }

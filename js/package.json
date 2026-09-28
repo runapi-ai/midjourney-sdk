@@ -3,7 +3,7 @@
   "runapi": {
     "slug": "midjourney"
   },
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "RunAPI Midjourney SDK for image generation, editing, image-to-video, first-video extension, and image helper workflows in JavaScript, Python, Ruby, Go, Java, and PHP",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -31,7 +31,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@runapi.ai/core": "^0.4.2"
+    "@runapi.ai/core": "^0.4.3"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

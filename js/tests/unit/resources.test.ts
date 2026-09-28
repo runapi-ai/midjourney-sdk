@@ -96,33 +96,25 @@ describe('Midjourney resources', () => {
     vi.mocked(mockHttp.request)
       .mockResolvedValueOnce({
         prompts: ['one', 'two', 'three', 'four'],
-        billing: {
-          reservation: { amount_cents: 5 },
-          settlement: { charged_amount_cents: 5, amount_micro_cents: 5_000_000 },
-          refund: null,
-        },
       })
       .mockResolvedValueOnce({
         seed: 8675309,
-        billing: {
-          reservation: null,
-          settlement: { charged_amount_cents: 1, amount_micro_cents: 1_000_000 },
-          refund: null,
-        },
       });
 
     const prompts = await new ImageToPrompt(mockHttp).run({
       source_image_url: 'https://cdn.runapi.ai/public/samples/source.png',
     });
     expect(prompts.prompts).toEqual(['one', 'two', 'three', 'four']);
-    expect(prompts.billing?.reservation?.amount_cents).toBe(5);
+    expect(prompts).not.toHaveProperty('billing');
+    expect(prompts).not.toHaveProperty('usage');
     expect(mockHttp.request).toHaveBeenLastCalledWith('POST', '/api/v1/midjourney/image_to_prompt', {
       body: { source_image_url: 'https://cdn.runapi.ai/public/samples/source.png' },
     });
 
     const seed = await new GetSeed(mockHttp).run({ image_id: 'image-1' });
     expect(seed.seed).toBe(8675309);
-    expect(seed.billing?.settlement?.charged_amount_cents).toBe(1);
+    expect(seed).not.toHaveProperty('billing');
+    expect(seed).not.toHaveProperty('usage');
     expect(mockHttp.request).toHaveBeenLastCalledWith('POST', '/api/v1/midjourney/get_seed', {
       body: { image_id: 'image-1' },
     });
@@ -131,11 +123,6 @@ describe('Midjourney resources', () => {
   it('shortens a prompt and returns decoded suggestions', async () => {
     vi.mocked(mockHttp.request).mockResolvedValueOnce({
       prompts: ['Concise mountain landscape'],
-      billing: {
-        reservation: null,
-        settlement: null,
-        refund: { refunded_at: '2026-07-27T00:00:00.000000Z' },
-      },
     });
 
     const result = await new ShortenPrompt(mockHttp).run({
@@ -143,7 +130,8 @@ describe('Midjourney resources', () => {
     });
 
     expect(result.prompts).toEqual(['Concise mountain landscape']);
-    expect(result.billing?.refund?.refunded_at).toBe('2026-07-27T00:00:00.000000Z');
+    expect(result).not.toHaveProperty('billing');
+    expect(result).not.toHaveProperty('usage');
     expect(mockHttp.request).toHaveBeenCalledWith('POST', '/api/v1/midjourney/shorten_prompt', expect.objectContaining({
       body: { prompt: 'A detailed cinematic mountain landscape' },
     }));
@@ -180,7 +168,6 @@ describe('Midjourney resources', () => {
           headers: {},
           body: {
             prompts: ['Concise mountain landscape'],
-            billing: { reservation: null, settlement: null, refund: null },
           },
         },
       }), {
@@ -213,7 +200,6 @@ describe('Midjourney resources', () => {
   it('returns an immediate terminal prompt response without querying Task Result', async () => {
     const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({
       prompts: ['Concise mountain landscape'],
-      billing: { reservation: null, settlement: null, refund: null },
     }), { headers: { 'content-type': 'application/json' } }));
     const resource = new ShortenPrompt(createHttpClient({
       apiKey: 'test-key',

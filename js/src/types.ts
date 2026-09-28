@@ -1,4 +1,4 @@
-import type { AsyncTaskStatus, TaskBillingResponse, TaskResponse } from '@runapi.ai/core';
+import type { AsyncTaskStatus, TaskResponse } from '@runapi.ai/core';
 
 export type MidjourneyTextToImageModel = 'midjourney-v8.1';
 export type MidjourneyEditImageModel = 'midjourney-edit-image';
@@ -68,7 +68,7 @@ export interface MidjourneyGetSeedParams {
   image_id: string;
 }
 
-export interface TaskCreateResponse extends TaskBillingResponse {
+export interface TaskCreateResponse {
   id: string;
   status?: AsyncTaskStatus;
 }
@@ -108,17 +108,17 @@ export type CompletedMidjourneyVideoTaskResponse = MidjourneyVideoTaskResponse &
   videos: MediaUrl[];
 };
 
-export interface MidjourneyImageToPromptResponse extends TaskBillingResponse {
+export interface MidjourneyImageToPromptResponse {
   prompts: string[];
   error?: string;
 }
 
-export interface MidjourneyShortenPromptResponse extends TaskBillingResponse {
+export interface MidjourneyShortenPromptResponse {
   prompts: string[];
   error?: string;
 }
 
-export interface MidjourneyGetSeedResponse extends TaskBillingResponse {
+export interface MidjourneyGetSeedResponse {
   seed: number;
   error?: string;
 }

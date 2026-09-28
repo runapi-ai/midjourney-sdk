@@ -1,5 +1,15 @@
 # Changelog
 
+## [js/v0.3.3](https://github.com/runapi-ai/midjourney-sdk/releases/tag/js%2Fv0.3.3), [ruby/v0.4.1](https://github.com/runapi-ai/midjourney-sdk/releases/tag/ruby%2Fv0.4.1), [go/v0.4.1](https://github.com/runapi-ai/midjourney-sdk/releases/tag/go%2Fv0.4.1) - 2026-09-28
+
+### Added
+- Return usage.cost as a float USD amount on completed async Task query and webhook envelopes.
+
+### Removed
+- Remove the public Task billing object from Task envelopes.
+  Migration: Read usage.cost on completed Task envelopes. Create, processing, and failed envelopes omit usage.
+
+
 ## [python/v0.5.0](https://github.com/runapi-ai/midjourney-sdk/releases/tag/python%2Fv0.5.0) - 2026-09-04
 
 ### Added
