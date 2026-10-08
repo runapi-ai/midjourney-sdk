@@ -15,8 +15,8 @@ public final class EditImageParams {
 
   private EditImageParams(Builder builder) {
     this.model = builder.model;
-    this.prompt = MidjourneyParamUtils.requireNonBlank(builder.prompt, "prompt");
-    this.sourceImageUrl = MidjourneyParamUtils.requireNonBlank(builder.sourceImageUrl, "sourceImageUrl");
+    this.prompt = builder.prompt;
+    this.sourceImageUrl = builder.sourceImageUrl;
     this.maskUrl = builder.maskUrl;
     this.includeSplitImages = builder.includeSplitImages;
     this.callbackUrl = builder.callbackUrl;
@@ -65,26 +65,26 @@ public final class EditImageParams {
 
     /** Sets the model slug using a string value. */
     public Builder model(String value) {
-      this.model = MidjourneyParamUtils.requireNonBlankTrim(value, "model");
+      this.model = value;
       return this;
     }
 
 
     /** Sets the text prompt. */
     public Builder prompt(String value) {
-      this.prompt = MidjourneyParamUtils.requireNonBlank(value, "prompt");
+      this.prompt = value;
       return this;
     }
 
     /** Sets the source image URL. */
     public Builder sourceImageUrl(String value) {
-      this.sourceImageUrl = MidjourneyParamUtils.requireNonBlank(value, "sourceImageUrl");
+      this.sourceImageUrl = value;
       return this;
     }
 
     /** Sets the mask URL. */
     public Builder maskUrl(String value) {
-      this.maskUrl = MidjourneyParamUtils.requireNonBlank(value, "maskUrl");
+      this.maskUrl = value;
       return this;
     }
 
@@ -96,7 +96,7 @@ public final class EditImageParams {
 
     /** Sets the webhook URL for task completion notifications. */
     public Builder callbackUrl(String value) {
-      this.callbackUrl = MidjourneyParamUtils.requireNonBlank(value, "callbackUrl");
+      this.callbackUrl = value;
       return this;
     }
 

@@ -17,7 +17,7 @@ public final class ImageToVideoParams {
   private ImageToVideoParams(Builder builder) {
     this.model = builder.model;
     this.prompt = builder.prompt;
-    this.sourceImageUrl = MidjourneyParamUtils.requireNonBlank(builder.sourceImageUrl, "sourceImageUrl");
+    this.sourceImageUrl = builder.sourceImageUrl;
     this.lastFrameImageUrl = builder.lastFrameImageUrl;
     this.outputResolution = builder.outputResolution;
     this.enableLoop = builder.enableLoop;
@@ -69,32 +69,32 @@ public final class ImageToVideoParams {
 
     /** Sets the model slug using a string value. */
     public Builder model(String value) {
-      this.model = MidjourneyParamUtils.requireNonBlankTrim(value, "model");
+      this.model = value;
       return this;
     }
 
 
     /** Sets the text prompt. */
     public Builder prompt(String value) {
-      this.prompt = MidjourneyParamUtils.requireNonBlank(value, "prompt");
+      this.prompt = value;
       return this;
     }
 
     /** Sets the source image URL. */
     public Builder sourceImageUrl(String value) {
-      this.sourceImageUrl = MidjourneyParamUtils.requireNonBlank(value, "sourceImageUrl");
+      this.sourceImageUrl = value;
       return this;
     }
 
     /** Sets the last frame image URL. */
     public Builder lastFrameImageUrl(String value) {
-      this.lastFrameImageUrl = MidjourneyParamUtils.requireNonBlank(value, "lastFrameImageUrl");
+      this.lastFrameImageUrl = value;
       return this;
     }
 
     /** Sets the output resolution. */
     public Builder outputResolution(String value) {
-      this.outputResolution = MidjourneyParamUtils.requireNonBlank(value, "outputResolution");
+      this.outputResolution = value;
       return this;
     }
 
@@ -106,7 +106,7 @@ public final class ImageToVideoParams {
 
     /** Sets the webhook URL for task completion notifications. */
     public Builder callbackUrl(String value) {
-      this.callbackUrl = MidjourneyParamUtils.requireNonBlank(value, "callbackUrl");
+      this.callbackUrl = value;
       return this;
     }
 

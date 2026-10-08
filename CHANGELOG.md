@@ -1,5 +1,12 @@
 # Changelog
 
+## [js/v0.4.0](https://github.com/runapi-ai/midjourney-sdk/releases/tag/js%2Fv0.4.0), [ruby/v0.5.0](https://github.com/runapi-ai/midjourney-sdk/releases/tag/ruby%2Fv0.5.0), [go/v0.5.0](https://github.com/runapi-ai/midjourney-sdk/releases/tag/go%2Fv0.5.0), [python/v0.6.0](https://github.com/runapi-ai/midjourney-sdk/releases/tag/python%2Fv0.6.0), [java/v0.4.0](https://github.com/runapi-ai/midjourney-sdk/releases/tag/java%2Fv0.4.0) - 2026-10-08
+
+### Changed
+- Send request parameters to the service without local validation. Model ids and parameter values the service supports work without an SDK upgrade; static types and enum constants remain for completion.
+  Migration: Invalid parameters now fail with the validation error built from the service's 400 response, including its status and message, instead of a validation error raised locally before the request. The error type is unchanged: `ValidationError` in JavaScript, Python, and Ruby, `ValidationException` in Java and PHP, and `ErrValidation` in Go.
+
+
 ## [js/v0.3.3](https://github.com/runapi-ai/midjourney-sdk/releases/tag/js%2Fv0.3.3), [ruby/v0.4.1](https://github.com/runapi-ai/midjourney-sdk/releases/tag/ruby%2Fv0.4.1), [go/v0.4.1](https://github.com/runapi-ai/midjourney-sdk/releases/tag/go%2Fv0.4.1) - 2026-09-28
 
 ### Added

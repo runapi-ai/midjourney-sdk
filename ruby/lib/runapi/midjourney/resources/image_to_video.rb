@@ -20,7 +20,6 @@ module RunApi
 
         def create(options: nil, **params)
           params = compact_params(params)
-          validate_contract!(CONTRACT["image-to-video"], params)
           request(:post, ENDPOINT, body: params, options: options)
         end
 

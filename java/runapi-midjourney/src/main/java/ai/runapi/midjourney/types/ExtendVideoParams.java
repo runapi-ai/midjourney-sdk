@@ -10,7 +10,7 @@ public final class ExtendVideoParams {
   private final String callbackUrl;
 
   private ExtendVideoParams(Builder builder) {
-    this.sourceTaskId = MidjourneyParamUtils.requireNonBlank(builder.sourceTaskId, "sourceTaskId");
+    this.sourceTaskId = builder.sourceTaskId;
     this.prompt = builder.prompt;
     this.callbackUrl = builder.callbackUrl;
   }
@@ -44,19 +44,19 @@ public final class ExtendVideoParams {
 
     /** Sets the completed image-to-video source task ID. */
     public Builder sourceTaskId(String value) {
-      this.sourceTaskId = MidjourneyParamUtils.requireNonBlank(value, "sourceTaskId");
+      this.sourceTaskId = value;
       return this;
     }
 
     /** Sets the optional continuation prompt. */
     public Builder prompt(String value) {
-      this.prompt = MidjourneyParamUtils.requireNonBlank(value, "prompt");
+      this.prompt = value;
       return this;
     }
 
     /** Sets the webhook URL for task completion notifications. */
     public Builder callbackUrl(String value) {
-      this.callbackUrl = MidjourneyParamUtils.requireNonBlank(value, "callbackUrl");
+      this.callbackUrl = value;
       return this;
     }
 

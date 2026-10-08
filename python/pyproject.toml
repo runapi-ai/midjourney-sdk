@@ -4,14 +4,14 @@ build-backend = "hatchling.build"
 
 [project]
 name = "runapi-midjourney"
-version = "0.5.0"
+version = "0.6.0"
 description = "RunAPI Midjourney SDK for image generation, editing, image-to-video, first-video extension, and image helper workflows in JavaScript, Python, Ruby, Go, Java, and PHP"
 readme = "README.md"
 requires-python = ">=3.9"
 license = "Apache-2.0"
 authors = [{ name = "RunAPI", email = "contact@runapi.ai" }]
 keywords = ["runapi", "runapi-ai", "midjourney", "api", "sdk", "typescript", "python", "ruby", "golang", "java", "maven", "gradle", "image-generation", "video-generation", "midjourney-api"]
-dependencies = ["runapi-core>=0.9.0"]
+dependencies = ["runapi-core~=0.10.0"]
 
 [project.urls]
 Homepage = "https://runapi.ai/models/midjourney"
@@ -19,7 +19,7 @@ Documentation = "https://runapi.ai/docs/resources/sdks"
 Source = "https://github.com/runapi-ai/midjourney-sdk"
 Issues = "https://github.com/runapi-ai/midjourney-sdk/issues"
 Changelog = "https://github.com/runapi-ai/midjourney-sdk/blob/main/CHANGELOG.md"
-"Release Notes" = "https://github.com/runapi-ai/midjourney-sdk/releases/tag/python%2Fv0.5.0"
+"Release Notes" = "https://github.com/runapi-ai/midjourney-sdk/releases/tag/python%2Fv0.6.0"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/runapi"]

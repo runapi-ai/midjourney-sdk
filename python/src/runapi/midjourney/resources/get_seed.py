@@ -4,7 +4,6 @@ from typing import Any, Optional
 
 from runapi.core import RequestOptions, Resource
 
-from ..contract_gen import CONTRACT
 from ..types import GetSeedResponse
 
 
@@ -14,5 +13,4 @@ class GetSeed(Resource):
 
     def run(self, options: Optional[RequestOptions] = None, **params: Any) -> Any:
         compacted = self._compact_params(params)
-        self._validate_contract(CONTRACT["get-seed"], compacted)
         return self._run_hybrid("post", self.ENDPOINT, body=compacted, options=options)

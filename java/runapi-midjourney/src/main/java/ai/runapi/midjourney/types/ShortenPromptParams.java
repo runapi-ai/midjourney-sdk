@@ -8,7 +8,7 @@ public final class ShortenPromptParams {
   private final String prompt;
 
   private ShortenPromptParams(Builder builder) {
-    this.prompt = MidjourneyParamUtils.requireNonBlank(builder.prompt, "prompt");
+    this.prompt = builder.prompt;
   }
 
   /** Creates a new ShortenPromptParams builder. */
@@ -36,7 +36,7 @@ public final class ShortenPromptParams {
 
     /** Sets the prompt to shorten. */
     public Builder prompt(String value) {
-      this.prompt = MidjourneyParamUtils.requireNonBlank(value, "prompt");
+      this.prompt = value;
       return this;
     }
 

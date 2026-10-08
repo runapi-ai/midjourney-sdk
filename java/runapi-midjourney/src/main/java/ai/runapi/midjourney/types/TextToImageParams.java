@@ -14,7 +14,7 @@ public final class TextToImageParams {
 
   private TextToImageParams(Builder builder) {
     this.model = builder.model;
-    this.prompt = MidjourneyParamUtils.requireNonBlank(builder.prompt, "prompt");
+    this.prompt = builder.prompt;
     this.enablePromptTranslation = builder.enablePromptTranslation;
     this.includeSplitImages = builder.includeSplitImages;
     this.callbackUrl = builder.callbackUrl;
@@ -61,14 +61,14 @@ public final class TextToImageParams {
 
     /** Sets the model slug using a string value. */
     public Builder model(String value) {
-      this.model = MidjourneyParamUtils.requireNonBlankTrim(value, "model");
+      this.model = value;
       return this;
     }
 
 
     /** Sets the text prompt. */
     public Builder prompt(String value) {
-      this.prompt = MidjourneyParamUtils.requireNonBlank(value, "prompt");
+      this.prompt = value;
       return this;
     }
 
@@ -86,7 +86,7 @@ public final class TextToImageParams {
 
     /** Sets the webhook URL for task completion notifications. */
     public Builder callbackUrl(String value) {
-      this.callbackUrl = MidjourneyParamUtils.requireNonBlank(value, "callbackUrl");
+      this.callbackUrl = value;
       return this;
     }
 

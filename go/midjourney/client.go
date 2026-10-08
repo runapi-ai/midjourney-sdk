@@ -69,7 +69,7 @@ type TextToImage struct{ http core.HTTPClient }
 
 // Create submits a text-to-image task and returns immediately with a task ID.
 func (r *TextToImage) Create(ctx context.Context, params TextToImageParams, opts ...option.RequestOption) (*core.TaskCreateResponse, error) {
-	return createAsync(ctx, r.http, "text-to-image", textToImagePath, params, opts...)
+	return createAsync(ctx, r.http, textToImagePath, params, opts...)
 }
 
 // Get retrieves the current status and result of a text-to-image task.
@@ -92,7 +92,7 @@ type EditImage struct{ http core.HTTPClient }
 
 // Create submits an image edit task and returns immediately with a task ID.
 func (r *EditImage) Create(ctx context.Context, params EditImageParams, opts ...option.RequestOption) (*core.TaskCreateResponse, error) {
-	return createAsync(ctx, r.http, "edit-image", editImagePath, params, opts...)
+	return createAsync(ctx, r.http, editImagePath, params, opts...)
 }
 
 // Get retrieves the current status and result of an image edit task.
@@ -115,7 +115,7 @@ type ImageToVideo struct{ http core.HTTPClient }
 
 // Create submits an image-to-video task and returns immediately with a task ID.
 func (r *ImageToVideo) Create(ctx context.Context, params ImageToVideoParams, opts ...option.RequestOption) (*core.TaskCreateResponse, error) {
-	return createAsync(ctx, r.http, "image-to-video", imageToVideoPath, params, opts...)
+	return createAsync(ctx, r.http, imageToVideoPath, params, opts...)
 }
 
 // Get retrieves the current status and result of an image-to-video task.
@@ -140,14 +140,6 @@ type ExtendVideo struct{ http core.HTTPClient }
 func (r *ExtendVideo) Create(ctx context.Context, params ExtendVideoParams, opts ...option.RequestOption) (*core.TaskCreateResponse, error) {
 	requestOptions, _ := option.ResolveRequestOptions(opts...)
 	body := core.CompactParams(params)
-	validationBody := make(map[string]any, len(body)+1)
-	for key, value := range body {
-		validationBody[key] = value
-	}
-	validationBody["model"] = string(ModelImageToVideo)
-	if err := core.ValidateParams(contractSchema["extend-video"], validationBody); err != nil {
-		return nil, err
-	}
 	return core.PostJSON[core.TaskCreateResponse](ctx, r.http, extendVideoPath, body, requestOptions)
 }
 
@@ -174,9 +166,6 @@ type ImageToPrompt struct{ http core.HTTPClient }
 func (r *ImageToPrompt) Create(ctx context.Context, params ImageToPromptParams, opts ...option.RequestOption) (*core.HybridCreateResponse[ImageToPromptResponse], error) {
 	requestOptions, _ := option.ResolveRequestOptions(opts...)
 	body := core.CompactParams(params)
-	if err := core.ValidateParams(contractSchema["image-to-prompt"], body); err != nil {
-		return nil, err
-	}
 	return core.CreateHybrid[ImageToPromptResponse](ctx, r.http, imageToPromptPath, body, requestOptions)
 }
 
@@ -191,9 +180,6 @@ func (r *ImageToPrompt) Subscribe(ctx context.Context, acceptance *core.HybridAc
 func (r *ImageToPrompt) Run(ctx context.Context, params ImageToPromptParams, opts ...option.RequestOption) (*ImageToPromptResponse, error) {
 	requestOptions, pollingOptions := option.ResolveRequestOptions(opts...)
 	body := core.CompactParams(params)
-	if err := core.ValidateParams(contractSchema["image-to-prompt"], body); err != nil {
-		return nil, err
-	}
 	return core.RunHybrid[ImageToPromptResponse](ctx, r.http, imageToPromptPath, body, requestOptions, pollingOptions)
 }
 
@@ -205,9 +191,6 @@ type ShortenPrompt struct{ http core.HTTPClient }
 func (r *ShortenPrompt) Create(ctx context.Context, params ShortenPromptParams, opts ...option.RequestOption) (*core.HybridCreateResponse[ShortenPromptResponse], error) {
 	requestOptions, _ := option.ResolveRequestOptions(opts...)
 	body := core.CompactParams(params)
-	if err := core.ValidateParams(contractSchema["shorten-prompt"], body); err != nil {
-		return nil, err
-	}
 	return core.CreateHybrid[ShortenPromptResponse](ctx, r.http, shortenPromptPath, body, requestOptions)
 }
 
@@ -222,9 +205,6 @@ func (r *ShortenPrompt) Subscribe(ctx context.Context, acceptance *core.HybridAc
 func (r *ShortenPrompt) Run(ctx context.Context, params ShortenPromptParams, opts ...option.RequestOption) (*ShortenPromptResponse, error) {
 	requestOptions, pollingOptions := option.ResolveRequestOptions(opts...)
 	body := core.CompactParams(params)
-	if err := core.ValidateParams(contractSchema["shorten-prompt"], body); err != nil {
-		return nil, err
-	}
 	return core.RunHybrid[ShortenPromptResponse](ctx, r.http, shortenPromptPath, body, requestOptions, pollingOptions)
 }
 
@@ -236,9 +216,6 @@ type GetSeed struct{ http core.HTTPClient }
 func (r *GetSeed) Create(ctx context.Context, params GetSeedParams, opts ...option.RequestOption) (*core.HybridCreateResponse[GetSeedResponse], error) {
 	requestOptions, _ := option.ResolveRequestOptions(opts...)
 	body := core.CompactParams(params)
-	if err := core.ValidateParams(contractSchema["get-seed"], body); err != nil {
-		return nil, err
-	}
 	return core.CreateHybrid[GetSeedResponse](ctx, r.http, getSeedPath, body, requestOptions)
 }
 
@@ -253,18 +230,12 @@ func (r *GetSeed) Subscribe(ctx context.Context, acceptance *core.HybridAcceptan
 func (r *GetSeed) Run(ctx context.Context, params GetSeedParams, opts ...option.RequestOption) (*GetSeedResponse, error) {
 	requestOptions, pollingOptions := option.ResolveRequestOptions(opts...)
 	body := core.CompactParams(params)
-	if err := core.ValidateParams(contractSchema["get-seed"], body); err != nil {
-		return nil, err
-	}
 	return core.RunHybrid[GetSeedResponse](ctx, r.http, getSeedPath, body, requestOptions, pollingOptions)
 }
 
-func createAsync[T any](ctx context.Context, httpClient core.HTTPClient, action, path string, params T, opts ...option.RequestOption) (*core.TaskCreateResponse, error) {
+func createAsync[T any](ctx context.Context, httpClient core.HTTPClient, path string, params T, opts ...option.RequestOption) (*core.TaskCreateResponse, error) {
 	requestOptions, _ := option.ResolveRequestOptions(opts...)
 	body := core.CompactParams(params)
-	if err := core.ValidateParams(contractSchema[action], body); err != nil {
-		return nil, err
-	}
 	return core.PostJSON[core.TaskCreateResponse](ctx, httpClient, path, body, requestOptions)
 }
 

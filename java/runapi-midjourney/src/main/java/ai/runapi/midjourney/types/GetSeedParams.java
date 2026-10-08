@@ -9,7 +9,7 @@ public final class GetSeedParams {
   private final String imageId;
 
   private GetSeedParams(Builder builder) {
-    this.imageId = MidjourneyParamUtils.requireNonBlank(builder.imageId, "imageId");
+    this.imageId = builder.imageId;
   }
 
   /** Creates a new GetSeedParams builder. */
@@ -39,7 +39,7 @@ public final class GetSeedParams {
 
     /** Sets the image ID. */
     public Builder imageId(String value) {
-      this.imageId = MidjourneyParamUtils.requireNonBlank(value, "imageId");
+      this.imageId = value;
       return this;
     }
 

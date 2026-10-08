@@ -9,7 +9,7 @@ public final class ImageToPromptParams {
   private final String sourceImageUrl;
 
   private ImageToPromptParams(Builder builder) {
-    this.sourceImageUrl = MidjourneyParamUtils.requireNonBlank(builder.sourceImageUrl, "sourceImageUrl");
+    this.sourceImageUrl = builder.sourceImageUrl;
   }
 
   /** Creates a new ImageToPromptParams builder. */
@@ -39,7 +39,7 @@ public final class ImageToPromptParams {
 
     /** Sets the source image URL. */
     public Builder sourceImageUrl(String value) {
-      this.sourceImageUrl = MidjourneyParamUtils.requireNonBlank(value, "sourceImageUrl");
+      this.sourceImageUrl = value;
       return this;
     }
 

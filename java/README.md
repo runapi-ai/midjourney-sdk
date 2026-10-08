@@ -8,7 +8,7 @@ Gradle:
 
 ```kotlin
 dependencies {
-  implementation("ai.runapi:runapi-midjourney:0.3.1")
+  implementation("ai.runapi:runapi-midjourney:0.4.0")
 }
 ```
 

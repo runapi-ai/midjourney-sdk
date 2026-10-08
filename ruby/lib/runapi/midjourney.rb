@@ -2,7 +2,6 @@
 
 require "runapi/core"
 require_relative "midjourney/types"
-require_relative "midjourney/contract_gen"
 require_relative "midjourney/resources/text_to_image"
 require_relative "midjourney/resources/edit_image"
 require_relative "midjourney/resources/image_to_video"

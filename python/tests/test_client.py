@@ -1,7 +1,7 @@
 import pytest
 
 from runapi.core import ApiResponse, config
-from runapi.core.errors import AuthenticationError, ValidationError
+from runapi.core.errors import AuthenticationError
 from runapi.midjourney import MidjourneyClient
 from runapi.midjourney.resources import EditImage, ExtendVideo, GetSeed, ImageToPrompt, ImageToVideo, ShortenPrompt, TextToImage
 from runapi.midjourney.types import GetSeedResponse, ImageToPromptResponse, ShortenPromptResponse
@@ -196,12 +196,3 @@ def test_get_seed_preserves_error_response_without_seed():
     assert isinstance(result, GetSeedResponse)
     assert result.seed is None
     assert result.error == "Seed lookup failed"
-
-
-def test_edit_image_requires_prompt_from_generated_contract():
-    client = MidjourneyClient(api_key="k", http_client=FakeHttp())
-    with pytest.raises(ValidationError, match="prompt is required"):
-        client.edit_image.create(
-            model="midjourney-edit-image",
-            source_image_url="https://cdn.runapi.ai/public/samples/source.png",
-        )

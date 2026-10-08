@@ -14,13 +14,11 @@ module RunApi
 
         def run(options: nil, **params)
           params = compact_params(params)
-          validate_contract!(CONTRACT["get-seed"], params)
           run_hybrid(ENDPOINT, body: params, options: options, response_class: RESPONSE_CLASS)
         end
 
         def subscribe(options: nil, **params)
           params = compact_params(params)
-          validate_contract!(CONTRACT["get-seed"], params)
           subscribe_hybrid(ENDPOINT, body: params, options: options, response_class: RESPONSE_CLASS)
         end
       end

@@ -3,7 +3,6 @@ package ai.runapi.midjourney.resources;
 import ai.runapi.core.ApiRequestExecutor;
 import ai.runapi.core.ClientOptions;
 import ai.runapi.core.RequestOptions;
-import ai.runapi.core.contract.ContractValidator;
 import ai.runapi.core.http.HttpMethod;
 import ai.runapi.core.http.HttpRequest;
 import ai.runapi.core.http.HttpTransport;
@@ -28,20 +27,10 @@ abstract class MidjourneyResource {
     this.options = options;
   }
 
-  final TaskCreateResponse createTask(String action, Map<String, Object> body, RequestOptions requestOptions) {
-    return createTask(action, body, body, requestOptions);
-  }
-
-  final TaskCreateResponse createTask(
-      String action,
-      Map<String, Object> validationBody,
-      Map<String, Object> wireBody,
-      RequestOptions requestOptions) {
+  final TaskCreateResponse createTask(String action, Map<String, Object> wireBody, RequestOptions requestOptions) {
     Objects.requireNonNull(action, "action");
-    Objects.requireNonNull(validationBody, "validationBody");
     Objects.requireNonNull(wireBody, "wireBody");
     Objects.requireNonNull(requestOptions, "requestOptions");
-    ContractValidator.validate(action, validationBody);
     return executor.send(
         HttpRequest.builder(HttpMethod.POST, endpoint).body(new JsonRequestBody(wireBody)).options(requestOptions).build(),
         TaskCreateResponse.class);
@@ -51,7 +40,6 @@ abstract class MidjourneyResource {
     Objects.requireNonNull(action, "action");
     Objects.requireNonNull(body, "body");
     Objects.requireNonNull(requestOptions, "requestOptions");
-    ContractValidator.validate(action, body);
     return executor.send(
         HttpRequest.builder(HttpMethod.POST, endpoint).body(new JsonRequestBody(body)).options(requestOptions).build(),
         responseType);
@@ -62,7 +50,6 @@ abstract class MidjourneyResource {
     Objects.requireNonNull(action, "action");
     Objects.requireNonNull(body, "body");
     Objects.requireNonNull(requestOptions, "requestOptions");
-    ContractValidator.validate(action, body);
     return Task.start(
         executor,
         HttpRequest.builder(HttpMethod.POST, endpoint).body(new JsonRequestBody(body)).options(requestOptions).build(),
@@ -87,22 +74,6 @@ abstract class MidjourneyResource {
       Class<T> responseType,
       Class<C> completedType) {
     TaskCreateResponse created = createTask(action, body, requestOptions);
-    String id = requireNonBlank(created.getId(), "id");
-    T response = Poller.pollUntilComplete(
-        () -> getTask(id, requestOptions, responseType),
-        pollingInterval(requestOptions),
-        pollingMaxWait(requestOptions));
-    return Json.mapper().convertValue(response, completedType);
-  }
-
-  final <T extends TaskResponse, C extends T> C runTask(
-      String action,
-      Map<String, Object> validationBody,
-      Map<String, Object> wireBody,
-      RequestOptions requestOptions,
-      Class<T> responseType,
-      Class<C> completedType) {
-    TaskCreateResponse created = createTask(action, validationBody, wireBody, requestOptions);
     String id = requireNonBlank(created.getId(), "id");
     T response = Poller.pollUntilComplete(
         () -> getTask(id, requestOptions, responseType),
