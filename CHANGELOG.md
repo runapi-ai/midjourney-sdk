@@ -1,5 +1,12 @@
 # Changelog
 
+## [python/v0.7.0](https://github.com/runapi-ai/midjourney-sdk/releases/tag/python%2Fv0.7.0) - 2026-11-04
+
+### Breaking
+- Require Python 3.10 or newer.
+  Migration: Upgrade the Python runtime to 3.10 or newer before installing or upgrading this package.
+
+
 ## [js/v0.4.1](https://github.com/runapi-ai/midjourney-sdk/releases/tag/js%2Fv0.4.1) - 2026-10-28
 
 ### Changed
